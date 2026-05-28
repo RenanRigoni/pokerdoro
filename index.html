@@ -2163,7 +2163,7 @@
           </label>
           <label class="form-field full">
             Valor atual da banca ($)
-            <input id="startBankroll" type="number" min="0" step="0.01" required placeholder="Ex: 10000">
+            <input id="startBankroll" type="text" inputmode="decimal" required placeholder="Ex: 1.905,95 ou 1905.95">
           </label>
         </div>
         <p class="form-note">A dura&ccedil;&atilde;o ser&aacute; calculada pela hora real de in&iacute;cio e fim da sess&atilde;o.</p>
@@ -2202,11 +2202,11 @@
           </label>
           <label class="form-field">
             Banca inicial ($)
-            <input id="modalBankrollStart" type="number" min="0" step="0.01" required>
+            <input id="modalBankrollStart" type="text" inputmode="decimal" required placeholder="Ex: 1.905,95">
           </label>
           <label class="form-field">
             Banca ap&oacute;s a sess&atilde;o ($)
-            <input id="modalBankrollEnd" type="number" min="0" step="0.01" required>
+            <input id="modalBankrollEnd" type="text" inputmode="decimal" required placeholder="Ex: 1.950,00">
           </label>
           <label class="form-field">
             M&atilde;os jogadas
@@ -2277,6 +2277,20 @@
         review: "Revis\u00e3o",
         ended: "Encerrada"
       };
+
+      function parseMoney(str) {
+        const s = String(str || "").trim().replace(/\s/g, "");
+        if (!s) return 0;
+        if (s.includes(",") && s.includes(".")) {
+          // 1.905,95 → BR format: dot=thousands, comma=decimal
+          return parseFloat(s.replace(/\./g, "").replace(",", ".")) || 0;
+        }
+        if (s.includes(",")) {
+          // 1905,95 → comma=decimal
+          return parseFloat(s.replace(",", ".")) || 0;
+        }
+        return parseFloat(s) || 0;
+      }
 
       function loadAppSettings() {
         try {
@@ -2966,7 +2980,7 @@
 
       function confirmStartSession() {
         const game = els.startGame.value.trim() || "Sess\u00e3o sem descri\u00e7\u00e3o";
-        const bankroll = Number(els.startBankroll.value);
+        const bankroll = parseMoney(els.startBankroll.value);
 
         state.currentSessionName = game;
         state.sessionStartBankroll = Number.isFinite(bankroll) ? bankroll : 0;
@@ -2984,7 +2998,7 @@
       }
 
       function getModalProfit() {
-        return (Number(els.modalBankrollEnd.value) || 0) - (Number(els.modalBankrollStart.value) || 0);
+        return parseMoney(els.modalBankrollEnd.value) - parseMoney(els.modalBankrollStart.value);
       }
 
       function updateProfitPreview() {
@@ -3049,8 +3063,8 @@
       }
 
       function sessionFromModal() {
-        const bankrollStart = Number(els.modalBankrollStart.value) || 0;
-        const bankrollEnd = Number(els.modalBankrollEnd.value) || 0;
+        const bankrollStart = parseMoney(els.modalBankrollStart.value);
+        const bankrollEnd = parseMoney(els.modalBankrollEnd.value);
         const existing = state.sessions.find((item) => item.id === els.modalSessionId.value);
         const profit = bankrollEnd - bankrollStart;
         return {
