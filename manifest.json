@@ -1,0 +1,16 @@
+{
+  "name": "POKERDORO",
+  "short_name": "Pokerdoro",
+  "description": "Timer Pomodoro para sessões de poker com tracking de bankroll",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#101211",
+  "theme_color": "#101211",
+  "icons": [
+    {
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect width='192' height='192' rx='24' fill='%23101211'/><path fill='%2335f28d' d='M96 22c-40 32-65 57-65 83a41 41 0 0 0 82 0c0 5 2 10 5 13v8H74v8h44v-8H98c3-3 5-8 5-13a41 41 0 0 0 82 0c0-26-25-51-65-83Zm-14 58c-3 14-8 26-18 34v7h12a27 27 0 0 0-24-41zm28 0a27 27 0 0 0-24 41h12v-7c-10-8-15-20-18-34z'/></svg>",
+      "sizes": "192x192",
+      "type": "image/svg+xml"
+    }
+  ]
+}

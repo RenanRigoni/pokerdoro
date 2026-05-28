@@ -4,6 +4,8 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>POKERDORO | Session Timer</title>
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#101211">
   <style>
     :root {
       color-scheme: dark;
@@ -1501,6 +1503,247 @@
         font-size: clamp(2.25rem, 13vw, 3.2rem);
       }
     }
+
+    /* Tooltips */
+    .field-label-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .tooltip-wrap {
+      position: relative;
+      display: inline-flex;
+    }
+
+    .tooltip-icon {
+      display: inline-grid;
+      place-items: center;
+      width: 18px;
+      height: 18px;
+      color: var(--faint);
+      background: rgba(255,255,255,0.06);
+      border-radius: 50%;
+      font-size: 0.72rem;
+      font-weight: 800;
+      cursor: default;
+      line-height: 1;
+      user-select: none;
+    }
+
+    .tooltip-text {
+      position: absolute;
+      bottom: calc(100% + 8px);
+      left: 50%;
+      transform: translateX(-50%);
+      z-index: 100;
+      width: 220px;
+      padding: 8px 10px;
+      color: var(--text);
+      background: #1a201d;
+      border: 1px solid var(--line);
+      border-radius: 7px;
+      font-size: 0.8rem;
+      font-weight: 500;
+      line-height: 1.4;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 140ms ease;
+      white-space: normal;
+      box-shadow: var(--shadow-soft);
+    }
+
+    .tooltip-wrap:hover .tooltip-text,
+    .tooltip-wrap:focus-within .tooltip-text {
+      opacity: 1;
+    }
+
+    .optional-tag {
+      color: var(--faint);
+      font-weight: 500;
+      font-size: 0.76rem;
+    }
+
+    /* Alert banners */
+    .alert-banner {
+      display: none;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 16px;
+      border-radius: var(--radius);
+      margin-bottom: 14px;
+      font-size: 0.9rem;
+      font-weight: 700;
+      border: 1px solid transparent;
+    }
+
+    .alert-banner.visible { display: flex; }
+
+    .alert-banner.warning {
+      color: #201700;
+      background: linear-gradient(135deg, rgba(245,201,75,0.22), rgba(245,201,75,0.08));
+      border-color: rgba(245,201,75,0.4);
+      color: var(--yellow);
+    }
+
+    .alert-banner.danger {
+      color: var(--red-pale);
+      background: rgba(239,78,78,0.1);
+      border-color: rgba(239,78,78,0.3);
+    }
+
+    .alert-banner-icon {
+      font-size: 1.2rem;
+      flex-shrink: 0;
+    }
+
+    /* Tilt risk indicator */
+    .tilt-pill {
+      display: inline-flex;
+      align-items: center;
+      height: 28px;
+      padding: 0 10px;
+      border-radius: 999px;
+      font-size: 0.78rem;
+      font-weight: 800;
+      gap: 5px;
+    }
+
+    .tilt-pill.low { color: var(--green); background: var(--green-soft); }
+    .tilt-pill.medium { color: var(--yellow); background: var(--yellow-soft); }
+    .tilt-pill.high { color: var(--red-pale); background: var(--red-soft); }
+
+    /* Period filter */
+    .period-filter {
+      display: flex;
+      gap: 4px;
+    }
+
+    .period-btn {
+      height: 32px;
+      padding: 0 10px;
+      color: var(--muted);
+      background: transparent;
+      border: 1px solid var(--line-soft);
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 0.8rem;
+      font-weight: 750;
+      transition: color 140ms, background 140ms, border-color 140ms;
+    }
+
+    .period-btn.active {
+      color: var(--green);
+      background: var(--green-soft);
+      border-color: rgba(53,242,141,0.3);
+    }
+
+    /* Empty state */
+    .empty-state {
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      gap: 12px;
+      padding: 48px 24px;
+      text-align: center;
+      color: var(--muted);
+    }
+
+    .empty-state.visible { display: flex; }
+
+    .empty-state-icon {
+      font-size: 2.4rem;
+      opacity: 0.4;
+    }
+
+    .empty-state h3 {
+      margin: 0;
+      color: var(--text);
+      font-size: 1.05rem;
+      font-weight: 800;
+    }
+
+    .empty-state p {
+      margin: 0;
+      font-size: 0.9rem;
+      max-width: 320px;
+      line-height: 1.5;
+    }
+
+    /* Bankroll chart */
+    .bankroll-chart-wrap {
+      margin-top: 18px;
+      padding-top: 18px;
+      border-top: 1px solid var(--line-soft);
+    }
+
+    .bankroll-chart-wrap h3 {
+      margin: 0 0 12px;
+      color: var(--muted);
+      font-size: 0.78rem;
+      font-weight: 800;
+      text-transform: uppercase;
+    }
+
+    .bankroll-chart {
+      width: 100%;
+      height: 80px;
+      overflow: visible;
+    }
+
+    /* Settings collapse */
+    .settings-toggle {
+      display: inline-grid;
+      place-items: center;
+      width: 32px;
+      height: 32px;
+      color: var(--muted);
+      background: transparent;
+      border: 1px solid var(--line-soft);
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 1rem;
+      transition: color 140ms, background 140ms;
+    }
+
+    .settings-toggle:hover { color: var(--green); background: var(--green-soft); }
+
+    .settings-body {
+      transition: opacity 180ms ease;
+    }
+
+    .settings-body.collapsed {
+      opacity: 0.35;
+      pointer-events: none;
+    }
+
+    /* Keyboard shortcut hint */
+    .kbd-hint {
+      font-size: 0.76rem;
+      color: var(--faint);
+      margin-top: 6px;
+      text-align: center;
+    }
+
+    kbd {
+      display: inline-block;
+      padding: 1px 5px;
+      background: rgba(255,255,255,0.07);
+      border: 1px solid var(--line);
+      border-radius: 4px;
+      font-family: inherit;
+      font-size: 0.76rem;
+    }
+
+    /* Mobile profile visible */
+    @media (max-width: 760px) {
+      .profile {
+        display: inline-flex;
+        min-width: 0;
+      }
+
+      .profile .status-dot { display: none; }
+    }
   </style>
 </head>
 <body>
@@ -1593,7 +1836,27 @@
       </section>
 
       <aside class="panel stats-panel" aria-labelledby="stats-title">
-        <h2 class="section-kicker" id="stats-title">Vis&atilde;o geral</h2>
+        <div id="streakBanner" class="alert-banner warning" role="alert" aria-live="polite">
+          <span class="alert-banner-icon">&#9888;</span>
+          <span id="streakBannerText">Série de 3 perdas consecutivas. Atenção ao tilt.</span>
+        </div>
+        <div id="stopLossBanner" class="alert-banner danger" role="alert" aria-live="assertive">
+          <span class="alert-banner-icon">&#128721;</span>
+          <span id="stopLossBannerText">Stop-loss atingido. Considere encerrar a sessão.</span>
+        </div>
+        <div id="winGoalBanner" class="alert-banner warning" role="alert" aria-live="polite">
+          <span class="alert-banner-icon">&#127942;</span>
+          <span id="winGoalBannerText">Win goal atingido. Ótimo momento para parar!</span>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px">
+          <h2 class="section-kicker" id="stats-title" style="margin:0">Vis&atilde;o geral</h2>
+          <div class="period-filter" role="group" aria-label="Filtro de per&iacute;odo">
+            <button class="period-btn" type="button" data-period="7">7d</button>
+            <button class="period-btn active" type="button" data-period="30">30d</button>
+            <button class="period-btn" type="button" data-period="90">90d</button>
+            <button class="period-btn" type="button" data-period="0">Tudo</button>
+          </div>
+        </div>
         <ul class="stat-list">
           <li class="stat-item">
             <span class="stat-icon"><svg class="icon" aria-hidden="true"><use href="#icon-calendar"></use></svg></span>
@@ -1631,7 +1894,19 @@
               <p class="stat-label" id="statWeeklyRemaining" style="margin-top:3px">Faltam 40h</p>
             </div>
           </li>
+          <li class="stat-item" id="rakebackStatItem" style="display:none">
+            <span class="stat-icon"><svg class="icon" aria-hidden="true"><use href="#icon-bankroll"></use></svg></span>
+            <div>
+              <p class="stat-label">Rakeback Est.</p>
+              <p class="stat-value positive" id="statRakeback">$0</p>
+              <p class="stat-label" style="margin-top:3px" id="statRakebackPct"></p>
+            </div>
+          </li>
         </ul>
+        <div id="tiltRiskRow" style="display:none;margin-top:12px;padding-top:12px;border-top:1px solid var(--line-soft)">
+          <span class="stat-label" style="font-size:0.78rem;font-weight:800;text-transform:uppercase;color:var(--muted)">Risco de Tilt</span>
+          <div style="margin-top:6px"><span class="tilt-pill" id="tiltPill">Baixo</span></div>
+        </div>
       </aside>
 
       <section class="panel control-panel" aria-labelledby="control-title">
@@ -1675,17 +1950,18 @@
         <div class="action-row">
           <button class="action-button primary" type="button" id="startBtn">
             <svg class="icon" aria-hidden="true"><use href="#icon-play"></use></svg>
-            <span id="startLabel">START SESSION</span>
+            <span id="startLabel">INICIAR SESS&Atilde;O</span>
           </button>
           <button class="action-button warning" type="button" id="pauseBtn" disabled>
             <svg class="icon" aria-hidden="true"><use href="#icon-pause"></use></svg>
-            <span id="pauseLabel">Pause</span>
+            <span id="pauseLabel">Pausar</span>
           </button>
           <button class="action-button danger" type="button" id="endBtn">
             <svg class="icon" aria-hidden="true"><use href="#icon-stop"></use></svg>
-            End Session
+            Encerrar
           </button>
         </div>
+        <p class="kbd-hint"><kbd>Space</kbd> iniciar/pausar &nbsp;&nbsp; <kbd>E</kbd> encerrar</p>
       </section>
 
       <aside class="panel settings-panel" id="settings" tabindex="-1" aria-labelledby="settings-title">
@@ -1694,7 +1970,9 @@
             <h2 class="section-title" id="settings-title">Pomodoro</h2>
             <p class="panel-caption">Ajuste os ciclos antes ou durante o grind.</p>
           </div>
+          <button class="settings-toggle" type="button" id="settingsToggleBtn" aria-label="Colapsar configura&ccedil;&otilde;es" title="Colapsar durante sess&atilde;o">&#8964;</button>
         </div>
+        <div class="settings-body" id="settingsBody">
 
         <div class="setting-block">
           <div class="setting-label">
@@ -1731,6 +2009,46 @@
         </div>
 
         <p class="settings-note">Ao alterar uma dura&ccedil;&atilde;o com o timer parado, o cron&ocirc;metro principal mostra o ciclo selecionado.</p>
+
+        <div class="setting-block">
+          <div class="setting-label">
+            <span>Stop-Loss ($)</span>
+            <small>0 = desativado</small>
+          </div>
+          <div class="stepper">
+            <button class="step-button" type="button" data-adjust="stopLoss" data-delta="-50" aria-label="Diminuir stop-loss">-</button>
+            <span class="duration-value" id="stopLossValue">0</span>
+            <button class="step-button" type="button" data-adjust="stopLoss" data-delta="50" aria-label="Aumentar stop-loss">+</button>
+          </div>
+          <p class="settings-note">Alerta quando perd eeste valor na sess&atilde;o.</p>
+        </div>
+
+        <div class="setting-block">
+          <div class="setting-label">
+            <span>Win Goal ($)</span>
+            <small>0 = desativado</small>
+          </div>
+          <div class="stepper">
+            <button class="step-button" type="button" data-adjust="winGoal" data-delta="-50" aria-label="Diminuir win goal">-</button>
+            <span class="duration-value" id="winGoalValue">0</span>
+            <button class="step-button" type="button" data-adjust="winGoal" data-delta="50" aria-label="Aumentar win goal">+</button>
+          </div>
+          <p class="settings-note">Alerta ao atingir este lucro na sess&atilde;o.</p>
+        </div>
+
+        <div class="setting-block">
+          <div class="setting-label">
+            <span>Rakeback (%)</span>
+            <small>0 = desativado</small>
+          </div>
+          <div class="stepper">
+            <button class="step-button" type="button" data-adjust="rakeback" data-delta="-5" aria-label="Diminuir rakeback">-</button>
+            <span class="duration-value" id="rakebackValue">0%</span>
+            <button class="step-button" type="button" data-adjust="rakeback" data-delta="5" aria-label="Aumentar rakeback">+</button>
+          </div>
+          <p class="settings-note">Calcula rakeback estimado sobre rake pago.</p>
+        </div>
+        </div>
       </aside>
 
       <section class="panel log-panel" id="sessions" tabindex="-1" aria-labelledby="log-title">
@@ -1742,7 +2060,12 @@
           <button class="command-button" type="button" id="addSessionBtn">Nova sess&atilde;o</button>
         </div>
 
-        <div class="table-wrap">
+        <div id="sessionsEmptyState" class="empty-state">
+          <div class="empty-state-icon">&#9824;</div>
+          <h3>Nenhuma sess&atilde;o registrada</h3>
+          <p>Clique em <strong>INICIAR SESS&Atilde;O</strong> no dashboard para come&ccedil;ar a trackear seu grind.</p>
+        </div>
+        <div class="table-wrap" id="sessionsTableWrap">
           <table>
             <thead>
               <tr>
@@ -1814,6 +2137,10 @@
         </div>
 
         <div class="game-performance" id="gamePerformance" aria-label="Performance por modalidade"></div>
+        <div class="bankroll-chart-wrap" id="bankrollChartWrap" style="display:none">
+          <h3>Evolu&ccedil;&atilde;o da Banca</h3>
+          <svg class="bankroll-chart" id="bankrollChart" aria-label="Gr&aacute;fico de evolu&ccedil;&atilde;o da banca" role="img"></svg>
+        </div>
       </section>
     </main>
   </div>
@@ -1886,15 +2213,21 @@
             <input id="modalHands" type="number" min="0" step="1" required>
           </label>
           <label class="form-field">
-            Won EV ($)
+            <span class="field-label-row">Won EV ($) <span class="optional-tag">(opcional)</span>
+              <span class="tooltip-wrap"><span class="tooltip-icon">?</span><span class="tooltip-text">EV total em d&oacute;lares. Exportado do Hand2Note &rarr; Session Summary &rarr; Won EV.</span></span>
+            </span>
             <input id="modalEvProfit" type="number" step="0.01" placeholder="Ex: 25946">
           </label>
           <label class="form-field">
-            EV bb/100
+            <span class="field-label-row">EV bb/100 <span class="optional-tag">(opcional)</span>
+              <span class="tooltip-wrap"><span class="tooltip-icon">?</span><span class="tooltip-text">Expected Value em big blinds por 100 m&atilde;os. Indica qualidade da tomada de decis&atilde;o independente de sorte.</span></span>
+            </span>
             <input id="modalEvBb100" type="number" step="0.01" placeholder="Ex: 8.6">
           </label>
           <label class="form-field">
-            Rake paid ($)
+            <span class="field-label-row">Rake paid ($) <span class="optional-tag">(opcional)</span>
+              <span class="tooltip-wrap"><span class="tooltip-icon">?</span><span class="tooltip-text">Total de rake pago na sess&atilde;o. Exportado do Hand2Note &rarr; Session Summary &rarr; Rake Paid.</span></span>
+            </span>
             <input id="modalRakePaid" type="number" min="0" step="0.01" placeholder="Ex: 16.95">
           </label>
           <label class="form-field">
@@ -1937,12 +2270,35 @@
   <script>
     (() => {
       const STORAGE_KEY = "pokerdoro.sessions.v2";
+      const SETTINGS_KEY = "pokerdoro.settings.v1";
       const LEGACY_STORAGE_KEYS = ["pokerdoro.sessions.v1"];
       const statusLabels = {
         completed: "Conclu\u00edda",
         review: "Revis\u00e3o",
         ended: "Encerrada"
       };
+
+      function loadAppSettings() {
+        try {
+          const s = JSON.parse(localStorage.getItem(SETTINGS_KEY) || "null");
+          if (s && typeof s === "object") return s;
+        } catch (_) {}
+        return {};
+      }
+
+      function saveAppSettings() {
+        try {
+          localStorage.setItem(SETTINGS_KEY, JSON.stringify({
+            stopLoss: state.stopLoss,
+            winGoal: state.winGoal,
+            rakebackPct: state.rakebackPct,
+            periodDays: state.periodDays,
+            settingsCollapsed: state.settingsCollapsed
+          }));
+        } catch (_) {}
+      }
+
+      const savedSettings = loadAppSettings();
 
       const state = {
         sessionMinutes: 60,
@@ -1963,12 +2319,20 @@
         dialogMode: "create",
         pendingAfterMode: "session",
         pendingDiscardAction: null,
-        pendingDiscardFocus: null
+        pendingDiscardFocus: null,
+        stopLoss: savedSettings.stopLoss || 0,
+        winGoal: savedSettings.winGoal || 0,
+        rakebackPct: savedSettings.rakebackPct || 0,
+        periodDays: savedSettings.periodDays || 30,
+        settingsCollapsed: savedSettings.settingsCollapsed || false
       };
 
       const limits = {
         session: { min: 15, max: 240 },
-        break: { min: 5, max: 60 }
+        break: { min: 5, max: 60 },
+        stopLoss: { min: 0, max: 5000 },
+        winGoal: { min: 0, max: 5000 },
+        rakeback: { min: 0, max: 60 }
       };
 
       const els = {
@@ -2035,6 +2399,26 @@
         confirmDiscardExit: document.querySelector("#confirmDiscardExit"),
         statWeeklyGrind: document.querySelector("#statWeeklyGrind"),
         statWeeklyRemaining: document.querySelector("#statWeeklyRemaining"),
+        statRakeback: document.querySelector("#statRakeback"),
+        statRakebackPct: document.querySelector("#statRakebackPct"),
+        rakebackStatItem: document.querySelector("#rakebackStatItem"),
+        tiltRiskRow: document.querySelector("#tiltRiskRow"),
+        tiltPill: document.querySelector("#tiltPill"),
+        stopLossValue: document.querySelector("#stopLossValue"),
+        winGoalValue: document.querySelector("#winGoalValue"),
+        rakebackValue: document.querySelector("#rakebackValue"),
+        streakBanner: document.querySelector("#streakBanner"),
+        streakBannerText: document.querySelector("#streakBannerText"),
+        stopLossBanner: document.querySelector("#stopLossBanner"),
+        stopLossBannerText: document.querySelector("#stopLossBannerText"),
+        winGoalBanner: document.querySelector("#winGoalBanner"),
+        winGoalBannerText: document.querySelector("#winGoalBannerText"),
+        sessionsEmptyState: document.querySelector("#sessionsEmptyState"),
+        sessionsTableWrap: document.querySelector("#sessionsTableWrap"),
+        bankrollChartWrap: document.querySelector("#bankrollChartWrap"),
+        bankrollChart: document.querySelector("#bankrollChart"),
+        settingsToggleBtn: document.querySelector("#settingsToggleBtn"),
+        settingsBody: document.querySelector("#settingsBody"),
         navLinks: document.querySelectorAll("[data-nav]"),
         workspace: document.querySelector("#workspace"),
         routeKicker: document.querySelector("#routeKicker"),
@@ -2287,6 +2671,123 @@
         els.statWeeklyRemaining.textContent = remainingMinutes === 0
           ? "Meta semanal atingida!"
           : `Faltam ${formatDurationMinutes(remainingMinutes)}`;
+      }
+
+      function getFilteredSessions() {
+        if (!state.periodDays) return state.sessions;
+        const cutoff = new Date();
+        cutoff.setDate(cutoff.getDate() - state.periodDays);
+        cutoff.setHours(0, 0, 0, 0);
+        return state.sessions.filter((s) => new Date(`${s.date}T12:00:00`) >= cutoff);
+      }
+
+      function getConsecutiveLosses() {
+        const sorted = getSortedSessions();
+        let count = 0;
+        for (const s of sorted) {
+          if (s.profit < 0) count++;
+          else break;
+        }
+        return count;
+      }
+
+      function getLiveSessionProfit() {
+        if (!state.activeSessionStarted || !state.sessionStartTimestamp) return null;
+        const latest = getLatestBankroll();
+        return latest - state.sessionStartBankroll;
+      }
+
+      function getTiltRisk() {
+        if (!state.running || state.mode !== "session") return null;
+        const elapsedMin = Math.floor((state.totalSeconds - state.remainingSeconds) / 60);
+        const profit = getLiveSessionProfit() || 0;
+        const losses = getConsecutiveLosses();
+        if (elapsedMin >= 180 && profit < 0) return "high";
+        if ((elapsedMin >= 120 && profit < 0) || losses >= 3) return "medium";
+        return "low";
+      }
+
+      function exportCSV() {
+        const headers = ["Data", "Modalidade", "Duracao (min)", "Maos", "Lucro ($)", "EV bb/100", "Rake ($)", "Won EV ($)", "Status", "Iniciada em", "Encerrada em"];
+        const rows = getSortedSessions().map((s) => [
+          s.date,
+          `"${s.game.replace(/"/g, '""')}"`,
+          s.durationMinutes,
+          s.hands,
+          s.profit.toFixed(2),
+          (s.evBb100 || 0).toFixed(2),
+          (s.rakePaid || 0).toFixed(2),
+          (s.evProfit || 0).toFixed(2),
+          s.status,
+          s.startedAt || "",
+          s.endedAt || ""
+        ]);
+        const csv = [headers.join(","), ...rows.map((r) => r.join(","))].join("\n");
+        const blob = new Blob(["﻿" + csv], { type: "text/csv;charset=utf-8" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `pokerdoro-sessoes-${todayIso()}.csv`;
+        a.click();
+        URL.revokeObjectURL(url);
+      }
+
+      function renderBankrollChart() {
+        const sorted = [...getSortedSessions()].reverse().slice(-20);
+        if (sorted.length < 2) {
+          els.bankrollChartWrap.style.display = "none";
+          return;
+        }
+        els.bankrollChartWrap.style.display = "block";
+        const values = sorted.map((s) => s.bankrollEnd);
+        const min = Math.min(...values);
+        const max = Math.max(...values);
+        const range = max - min || 1;
+        const w = 400;
+        const h = 70;
+        const pts = values.map((v, i) => {
+          const x = (i / (values.length - 1)) * w;
+          const y = h - ((v - min) / range) * h;
+          return `${x.toFixed(1)},${y.toFixed(1)}`;
+        });
+        const polyline = `<polyline points="${pts.join(" ")}" fill="none" stroke="var(--green)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>`;
+        const area = `<polygon points="0,${h} ${pts.join(" ")} ${w},${h}" fill="rgba(53,242,141,0.06)"/>`;
+        els.bankrollChart.setAttribute("viewBox", `0 0 ${w} ${h}`);
+        els.bankrollChart.innerHTML = area + polyline;
+      }
+
+      function renderAlerts() {
+        const losses = getConsecutiveLosses();
+        const showStreak = losses >= 3;
+        els.streakBanner.classList.toggle("visible", showStreak);
+        if (showStreak) els.streakBannerText.textContent = `Série de ${losses} perdas consecutivas. Atenção ao tilt.`;
+
+        const liveProfit = getLiveSessionProfit();
+        const showStop = state.stopLoss > 0 && liveProfit !== null && liveProfit <= -state.stopLoss;
+        els.stopLossBanner.classList.toggle("visible", showStop);
+        if (showStop) els.stopLossBannerText.textContent = `Stop-loss de $${state.stopLoss} atingido. Considere encerrar.`;
+
+        const showWin = state.winGoal > 0 && liveProfit !== null && liveProfit >= state.winGoal;
+        els.winGoalBanner.classList.toggle("visible", showWin);
+        if (showWin) els.winGoalBannerText.textContent = `Win goal de $${state.winGoal} atingido. Ótimo momento para parar!`;
+      }
+
+      function renderTiltRisk() {
+        const risk = getTiltRisk();
+        if (!risk) {
+          els.tiltRiskRow.style.display = "none";
+          return;
+        }
+        els.tiltRiskRow.style.display = "block";
+        const labels = { low: "Baixo", medium: "Médio", high: "Alto" };
+        els.tiltPill.textContent = labels[risk];
+        els.tiltPill.className = `tilt-pill ${risk}`;
+      }
+
+      function renderSettingsCollapse() {
+        els.settingsBody.classList.toggle("collapsed", state.settingsCollapsed);
+        els.settingsToggleBtn.textContent = state.settingsCollapsed ? "▾" : "▴";
+        els.settingsToggleBtn.title = state.settingsCollapsed ? "Expandir configurações" : "Colapsar configurações";
       }
 
       function getLatestBankroll() {
@@ -2687,8 +3188,23 @@
         render();
       }
 
-      function setDuration(kind, minutes) {
-        const safeMinutes = clamp(minutes, limits[kind].min, limits[kind].max);
+      function setDuration(kind, value) {
+        if (kind === "stopLoss" || kind === "winGoal") {
+          const safeVal = clamp(value, limits[kind].min, limits[kind].max);
+          state[kind] = safeVal;
+          saveAppSettings();
+          render();
+          return;
+        }
+        if (kind === "rakeback") {
+          const safeVal = clamp(value, limits.rakeback.min, limits.rakeback.max);
+          state.rakebackPct = safeVal;
+          saveAppSettings();
+          renderDataViews();
+          render();
+          return;
+        }
+        const safeMinutes = clamp(value, limits[kind].min, limits[kind].max);
         if (kind === "session") {
           state.sessionMinutes = safeMinutes;
         } else {
@@ -2781,7 +3297,8 @@
       }
 
       function renderStats() {
-        const stats = getStats();
+        const filtered = getFilteredSessions();
+        const stats = getStats(filtered);
         els.statTotalSessions.textContent = String(stats.totalSessions);
         els.statTotalTime.textContent = formatDurationMinutes(stats.totalMinutes);
         els.statNetProfit.textContent = formatSignedMoney(stats.totalProfit);
@@ -2789,13 +3306,28 @@
         setMoneyTone(els.statNetProfit, stats.totalProfit);
         setMoneyTone(els.statAvgSession, stats.avgProfit);
 
-        routes.sessions.badge = `${stats.totalSessions} sess\u00f5es`;
+        if (state.rakebackPct > 0) {
+          const rakeback = stats.totalRake * (state.rakebackPct / 100);
+          els.statRakeback.textContent = formatSignedMoney(rakeback);
+          els.statRakebackPct.textContent = `${state.rakebackPct}% de ${formatMoney(stats.totalRake, 2)}`;
+          els.rakebackStatItem.style.display = "flex";
+        } else {
+          els.rakebackStatItem.style.display = "none";
+        }
+
+        routes.sessions.badge = `${state.sessions.length} sess\u00f5es`;
         routes.dashboard.badge = formatSignedMoney(stats.totalProfit);
         renderWeeklyStats();
+        renderAlerts();
+        renderTiltRisk();
+
+        const hasData = state.sessions.length > 0;
+        els.sessionsEmptyState.classList.toggle("visible", !hasData);
+        els.sessionsTableWrap.style.display = hasData ? "block" : "none";
       }
 
       function renderReports() {
-        const recentSessions = getLast30Sessions();
+        const recentSessions = getFilteredSessions();
         const stats = getStats(recentSessions);
 
         els.reportRoi.textContent = `${stats.roi >= 0 ? "+" : ""}${stats.roi.toFixed(1)}%`;
@@ -2849,6 +3381,8 @@
           item.append(gameName, track, profit);
           els.gamePerformance.append(item);
         });
+
+        renderBankrollChart();
       }
 
       function refreshRouteHeader() {
@@ -2889,7 +3423,7 @@
         const isSession = state.mode === "session";
         els.modeTag.textContent = isSession ? "Sess\u00e3o" : "Pausa";
         els.timerModeLabel.textContent = isSession ? "Pomodoro Timer" : "Break Timer";
-        els.startLabel.textContent = isSession ? "START SESSION" : "START BREAK";
+        els.startLabel.textContent = isSession ? "INICIAR SESSÃO" : "INICIAR PAUSA";
 
         if (state.running) {
           els.statusPill.textContent = isSession ? "Em sess\u00e3o" : "Em pausa";
@@ -2910,9 +3444,17 @@
         }
 
         els.pauseBtn.disabled = !state.running && !state.paused;
-        els.pauseLabel.textContent = state.paused ? "Resume" : "Pause";
-        if (state.running && state.mode === "session") renderWeeklyStats();
+        els.pauseLabel.textContent = state.paused ? "Retomar" : "Pausar";
+        els.stopLossValue.textContent = state.stopLoss > 0 ? `$${state.stopLoss}` : "0";
+        els.winGoalValue.textContent = state.winGoal > 0 ? `$${state.winGoal}` : "0";
+        els.rakebackValue.textContent = `${state.rakebackPct}%`;
+        if (state.running && state.mode === "session") {
+          renderWeeklyStats();
+          renderAlerts();
+          renderTiltRisk();
+        }
         renderQuickButtons();
+        renderSettingsCollapse();
       }
 
       document.querySelectorAll("[data-adjust]").forEach((button) => {
@@ -3036,35 +3578,13 @@
         toggleProfileMenu();
       });
 
-      els.profileMenu.addEventListener("click", (event) => {
-        const actionButton = event.target.closest("[data-profile-action]");
-        if (!actionButton) return;
-
-        const messages = {
-          bankroll: "Bankroll aberta",
-          export: "Exporta\u00e7\u00e3o pronta",
-          logout: "Perfil ativo"
-        };
-
-        els.statusPill.textContent = messages[actionButton.dataset.profileAction];
-        toggleProfileMenu(false);
-      });
 
       document.addEventListener("click", () => toggleProfileMenu(false));
       document.addEventListener("keydown", (event) => {
         if (event.key === "Escape") {
-          if (els.discardConfirmModal.classList.contains("open")) {
-            closeDiscardConfirm(true);
-            return;
-          }
-          if (els.sessionModal.classList.contains("open")) {
-            requestSessionModalDismiss();
-            return;
-          }
-          if (els.startSessionModal.classList.contains("open")) {
-            requestStartSessionDismiss();
-            return;
-          }
+          if (els.discardConfirmModal.classList.contains("open")) { closeDiscardConfirm(true); return; }
+          if (els.sessionModal.classList.contains("open")) { requestSessionModalDismiss(); return; }
+          if (els.startSessionModal.classList.contains("open")) { requestStartSessionDismiss(); return; }
           toggleProfileMenu(false);
         }
       });
@@ -3078,6 +3598,52 @@
       els.pauseBtn.addEventListener("click", pauseTimer);
       els.endBtn.addEventListener("click", endSession);
 
+      document.addEventListener("keydown", (event) => {
+        const tag = document.activeElement?.tagName;
+        if (["INPUT", "SELECT", "TEXTAREA"].includes(tag)) return;
+        if (event.key === " " || event.code === "Space") {
+          event.preventDefault();
+          if (state.running || state.paused) pauseTimer();
+          else startTimer();
+        }
+        if (event.key === "e" || event.key === "E") {
+          if (!els.startSessionModal.classList.contains("open") &&
+              !els.sessionModal.classList.contains("open") &&
+              !els.discardConfirmModal.classList.contains("open")) {
+            endSession();
+          }
+        }
+      });
+
+      document.querySelectorAll("[data-period]").forEach((btn) => {
+        btn.addEventListener("click", () => {
+          state.periodDays = Number(btn.dataset.period);
+          saveAppSettings();
+          document.querySelectorAll("[data-period]").forEach((b) => b.classList.toggle("active", b === btn));
+          renderDataViews();
+        });
+      });
+
+      els.settingsToggleBtn.addEventListener("click", () => {
+        state.settingsCollapsed = !state.settingsCollapsed;
+        saveAppSettings();
+        renderSettingsCollapse();
+      });
+
+      els.profileMenu.addEventListener("click", (event) => {
+        const actionButton = event.target.closest("[data-profile-action]");
+        if (!actionButton) return;
+        const action = actionButton.dataset.profileAction;
+        if (action === "export") {
+          exportCSV();
+          toggleProfileMenu(false);
+          return;
+        }
+        const messages = { bankroll: "Bankroll aberta", logout: "Perfil ativo" };
+        els.statusPill.textContent = messages[action] || "";
+        toggleProfileMenu(false);
+      });
+
       renderDataViews();
       render();
 
@@ -3086,6 +3652,10 @@
         window.setTimeout(() => navigateTo(initialRoute, false), 80);
       } else {
         navigateTo("dashboard", false);
+      }
+
+      if ("serviceWorker" in navigator) {
+        navigator.serviceWorker.register("/sw.js").catch(() => {});
       }
     })();
   </script>
