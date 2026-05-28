@@ -1,0 +1,3093 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>POKERDORO | Session Timer</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #101211;
+      --bg-soft: #151816;
+      --panel: #1b201d;
+      --panel-strong: #212822;
+      --panel-muted: #181d1a;
+      --line: #303832;
+      --line-soft: rgba(255, 255, 255, 0.08);
+      --text: #f3f7f4;
+      --muted: #a4afa8;
+      --faint: #69756e;
+      --green: #35f28d;
+      --green-2: #0fc66f;
+      --green-soft: rgba(53, 242, 141, 0.15);
+      --yellow: #f5c94b;
+      --yellow-soft: rgba(245, 201, 75, 0.16);
+      --red: #ef4e4e;
+      --red-soft: rgba(239, 78, 78, 0.17);
+      --shadow: 0 26px 80px rgba(0, 0, 0, 0.38);
+      --shadow-soft: 0 12px 36px rgba(0, 0, 0, 0.25);
+      --radius: 8px;
+      --btn-bg: #252d28;
+      --green-bright: #79ffba;
+      --green-pale: #8cffbd;
+      --red-pale: #ff9b9b;
+    }
+
+    * {
+      box-sizing: border-box;
+      letter-spacing: 0;
+    }
+
+    html {
+      min-height: 100%;
+      scroll-behavior: smooth;
+      scroll-padding-top: 108px;
+    }
+
+    body {
+      min-height: 100vh;
+      margin: 0;
+      color: var(--text);
+      font-family: Inter, Roboto, "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+      background:
+        radial-gradient(circle at 50% 0%, rgba(35, 169, 103, 0.22), transparent 34rem),
+        linear-gradient(135deg, rgba(37, 70, 52, 0.34), transparent 34%),
+        var(--bg);
+      overflow-x: hidden;
+    }
+
+    body::before {
+      position: fixed;
+      inset: 0;
+      z-index: -2;
+      content: "";
+      background:
+        repeating-linear-gradient(90deg, rgba(255, 255, 255, 0.035) 0 1px, transparent 1px 88px),
+        repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.025) 0 1px, transparent 1px 88px);
+      mask-image: linear-gradient(to bottom, rgba(0, 0, 0, 0.75), transparent 78%);
+      opacity: 0.5;
+    }
+
+    body::after {
+      position: fixed;
+      inset: 0;
+      z-index: -1;
+      pointer-events: none;
+      content: "";
+      background:
+        linear-gradient(90deg, rgba(0, 0, 0, 0.64), transparent 34%, transparent 66%, rgba(0, 0, 0, 0.58)),
+        linear-gradient(180deg, transparent 0%, rgba(0, 0, 0, 0.42) 100%);
+    }
+
+    button {
+      font: inherit;
+    }
+
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      white-space: nowrap;
+      border: 0;
+    }
+
+    .app {
+      width: min(1380px, calc(100vw - 32px));
+      margin: 0 auto;
+      padding: 18px 0 32px;
+    }
+
+    .topbar {
+      position: sticky;
+      top: 14px;
+      z-index: 20;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      min-height: 70px;
+      padding: 0 16px;
+      background: rgba(21, 25, 23, 0.86);
+      border: 1px solid var(--line-soft);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-soft);
+      backdrop-filter: blur(18px);
+    }
+
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      min-width: 190px;
+      color: var(--text);
+      text-decoration: none;
+      font-size: 1.05rem;
+      font-weight: 800;
+    }
+
+    .logo-mark {
+      display: grid;
+      place-items: center;
+      width: 36px;
+      height: 36px;
+      color: #07140e;
+      background: linear-gradient(145deg, var(--green), var(--green-pale));
+      border-radius: 8px;
+      box-shadow: 0 0 22px rgba(53, 242, 141, 0.35);
+    }
+
+    .logo-mark svg,
+    .icon {
+      width: 20px;
+      height: 20px;
+      flex: 0 0 auto;
+    }
+
+    .nav {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+      min-width: 0;
+    }
+
+    .nav-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      height: 44px;
+      padding: 0 12px;
+      color: var(--muted);
+      text-decoration: none;
+      border: 1px solid transparent;
+      border-radius: 7px;
+      cursor: pointer;
+      transition: color 160ms ease, background 160ms ease, border-color 160ms ease;
+    }
+
+    .nav-link:hover,
+    .nav-link.active {
+      color: var(--green);
+      background: rgba(53, 242, 141, 0.08);
+      border-color: rgba(53, 242, 141, 0.16);
+    }
+
+    .profile {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      justify-content: flex-end;
+      min-width: 190px;
+      gap: 10px;
+    }
+
+    .profile-button {
+      display: inline-grid;
+      place-items: center;
+      width: 42px;
+      height: 42px;
+      color: var(--text);
+      background: linear-gradient(180deg, var(--btn-bg), #1a201d);
+      border: 1px solid var(--line);
+      border-radius: 50%;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+      cursor: pointer;
+      transition: transform 160ms ease, border-color 160ms ease, background 160ms ease;
+    }
+
+    .profile-button:hover,
+    .profile-button[aria-expanded="true"] {
+      transform: translateY(-1px);
+      border-color: rgba(53, 242, 141, 0.34);
+      background: linear-gradient(180deg, #2c3831, #1c251f);
+    }
+
+    .profile-menu {
+      position: absolute;
+      top: calc(100% + 10px);
+      right: 0;
+      z-index: 30;
+      display: grid;
+      gap: 4px;
+      width: 210px;
+      padding: 10px;
+      background: rgba(21, 25, 23, 0.96);
+      border: 1px solid var(--line-soft);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-soft);
+      backdrop-filter: blur(18px);
+      opacity: 0;
+      pointer-events: none;
+      transform: translateY(-6px);
+      transition: opacity 160ms ease, transform 160ms ease;
+    }
+
+    .profile-menu.open {
+      opacity: 1;
+      pointer-events: auto;
+      transform: translateY(0);
+    }
+
+    .profile-name {
+      padding: 8px 10px 10px;
+      color: var(--text);
+      border-bottom: 1px solid var(--line-soft);
+      font-weight: 850;
+    }
+
+    .profile-name small {
+      display: block;
+      margin-top: 2px;
+      color: var(--muted);
+      font-size: 0.78rem;
+      font-weight: 650;
+    }
+
+    .profile-menu button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: flex-start;
+      min-height: 38px;
+      padding: 0 10px;
+      color: var(--muted);
+      background: transparent;
+      border: 1px solid transparent;
+      border-radius: 7px;
+      cursor: pointer;
+      font-weight: 750;
+      text-align: left;
+    }
+
+    .profile-menu button:hover {
+      color: var(--green);
+      background: rgba(53, 242, 141, 0.08);
+      border-color: rgba(53, 242, 141, 0.14);
+    }
+
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      background: var(--green);
+      border-radius: 999px;
+      box-shadow: 0 0 18px var(--green);
+    }
+
+    .dashboard-grid {
+      display: grid;
+      grid-template-columns: minmax(230px, 270px) minmax(0, 1fr);
+      grid-template-areas:
+        "route route"
+        "stats control";
+      gap: 20px;
+      align-items: start;
+      margin-top: 22px;
+    }
+
+    .dashboard-grid[data-route] > .panel {
+      display: none;
+    }
+
+    .dashboard-grid[data-route="dashboard"] {
+      grid-template-columns: minmax(230px, 270px) minmax(0, 1fr);
+      grid-template-areas:
+        "route route"
+        "stats control";
+    }
+
+    .dashboard-grid[data-route="sessions"],
+    .dashboard-grid[data-route="reports"] {
+      grid-template-columns: minmax(0, 1fr);
+      grid-template-areas:
+        "route"
+        "log";
+    }
+
+    .dashboard-grid[data-route="reports"] {
+      grid-template-areas:
+        "route"
+        "reports";
+    }
+
+    .dashboard-grid[data-route="settings"] {
+      grid-template-columns: minmax(0, 780px);
+      grid-template-areas:
+        "route"
+        "settings";
+      justify-content: center;
+    }
+
+    .dashboard-grid[data-route="dashboard"] .stats-panel,
+    .dashboard-grid[data-route="dashboard"] .control-panel,
+    .dashboard-grid[data-route="sessions"] .log-panel,
+    .dashboard-grid[data-route="reports"] .reports-panel,
+    .dashboard-grid[data-route="settings"] .settings-panel {
+      display: block;
+    }
+
+    .route-header {
+      grid-area: route;
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 18px;
+      min-height: 96px;
+      padding: 20px 22px;
+      background:
+        linear-gradient(135deg, rgba(53, 242, 141, 0.13), transparent 42%),
+        rgba(21, 25, 23, 0.68);
+      border: 1px solid var(--line-soft);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-soft);
+    }
+
+    .route-header .section-kicker {
+      margin-bottom: 6px;
+    }
+
+    .route-title {
+      margin: 0;
+      color: var(--text);
+      font-size: clamp(1.6rem, 3vw, 2.4rem);
+      font-weight: 900;
+      line-height: 1.05;
+    }
+
+    .route-description {
+      max-width: 760px;
+      margin: 8px 0 0;
+      color: var(--muted);
+      font-size: 0.98rem;
+      line-height: 1.45;
+    }
+
+    .route-badge {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 112px;
+      min-height: 36px;
+      padding: 0 14px;
+      color: var(--green);
+      background: var(--green-soft);
+      border: 1px solid rgba(53, 242, 141, 0.22);
+      border-radius: 999px;
+      font-size: 0.86rem;
+      font-weight: 850;
+      white-space: nowrap;
+    }
+
+    .panel {
+      position: relative;
+      overflow: hidden;
+      background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.045), transparent 34%),
+        linear-gradient(135deg, rgba(53, 242, 141, 0.045), transparent 38%),
+        var(--panel);
+      border: 1px solid var(--line-soft);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+    }
+
+    .panel:focus-visible {
+      outline: 2px solid var(--green);
+      outline-offset: 4px;
+    }
+
+    .stats-panel {
+      grid-area: stats;
+      padding: 20px 18px;
+    }
+
+    .control-panel {
+      grid-area: control;
+      padding: 24px;
+    }
+
+    .settings-panel {
+      grid-area: settings;
+      padding: 22px;
+    }
+
+    .log-panel {
+      grid-area: log;
+      padding: 22px;
+    }
+
+    .reports-panel {
+      grid-area: reports;
+      padding: 22px;
+    }
+
+    .section-title {
+      margin: 0;
+      color: var(--text);
+      font-size: clamp(1.35rem, 2.2vw, 2rem);
+      font-weight: 800;
+    }
+
+    .section-kicker {
+      margin: 0 0 16px;
+      color: var(--muted);
+      font-size: 0.78rem;
+      font-weight: 800;
+      text-transform: uppercase;
+    }
+
+    .panel-head {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 18px;
+    }
+
+    .panel-title-block {
+      display: grid;
+      gap: 4px;
+      min-width: 0;
+    }
+
+    .panel-caption {
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.93rem;
+    }
+
+    .live-pill {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 106px;
+      height: 34px;
+      padding: 0 12px;
+      color: var(--green);
+      background: var(--green-soft);
+      border: 1px solid rgba(53, 242, 141, 0.22);
+      border-radius: 999px;
+      font-size: 0.84rem;
+      font-weight: 800;
+      white-space: nowrap;
+    }
+
+    .stat-list {
+      display: grid;
+      gap: 0;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    .stat-item {
+      display: grid;
+      grid-template-columns: 42px minmax(0, 1fr);
+      gap: 12px;
+      align-items: center;
+      min-height: 78px;
+      border-bottom: 1px solid var(--line-soft);
+    }
+
+    .stat-item:last-child {
+      border-bottom: 0;
+    }
+
+    .stat-icon {
+      display: grid;
+      place-items: center;
+      width: 38px;
+      height: 38px;
+      color: var(--muted);
+      background: rgba(255, 255, 255, 0.035);
+      border: 1px solid var(--line);
+      border-radius: 8px;
+    }
+
+    .stat-label {
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.88rem;
+    }
+
+    .stat-value {
+      margin: 2px 0 0;
+      color: var(--text);
+      font-size: 1.42rem;
+      font-weight: 850;
+      line-height: 1.1;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .positive {
+      color: var(--green);
+      text-shadow: 0 0 18px rgba(53, 242, 141, 0.24);
+    }
+
+    .negative {
+      color: var(--red);
+      text-shadow: 0 0 18px rgba(239, 78, 78, 0.22);
+    }
+
+    .neutral {
+      color: var(--muted);
+    }
+
+    .timer-stage {
+      display: grid;
+      grid-template-columns: 178px minmax(0, 1fr);
+      gap: 24px;
+      align-items: center;
+      min-height: 212px;
+      padding: 8px 0 12px;
+    }
+
+    .dial {
+      position: relative;
+      display: grid;
+      place-items: center;
+      width: 178px;
+      height: 178px;
+    }
+
+    .dial::before {
+      position: absolute;
+      width: 126px;
+      height: 126px;
+      content: "";
+      background: #17211b;
+      border: 1px solid rgba(53, 242, 141, 0.16);
+      border-radius: 50%;
+      box-shadow: inset 0 0 28px rgba(0, 0, 0, 0.42), 0 0 48px rgba(53, 242, 141, 0.14);
+    }
+
+    .progress-ring {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      filter: drop-shadow(0 0 14px rgba(53, 242, 141, 0.32));
+      transform: rotate(-90deg);
+    }
+
+    .progress-ring__track,
+    .progress-ring__bar {
+      fill: none;
+      stroke-width: 7;
+    }
+
+    .progress-ring__track {
+      stroke: rgba(255, 255, 255, 0.09);
+    }
+
+    .progress-ring__bar {
+      stroke: url(#ringGradient);
+      stroke-linecap: round;
+      stroke-dasharray: 100;
+      stroke-dashoffset: 0;
+      transition: stroke-dashoffset 240ms linear;
+    }
+
+    .dial-core {
+      position: relative;
+      z-index: 1;
+      display: grid;
+      place-items: center;
+      width: 72px;
+      height: 72px;
+      color: #06140d;
+      background: linear-gradient(145deg, var(--green), #a6ffd0);
+      border-radius: 50%;
+      box-shadow: 0 0 28px rgba(53, 242, 141, 0.36);
+    }
+
+    .timer-copy {
+      min-width: 0;
+    }
+
+    .timer-label {
+      margin: 0 0 6px;
+      color: var(--muted);
+      font-size: 1.05rem;
+      font-weight: 650;
+    }
+
+    .timer-readout {
+      margin: 0;
+      color: var(--green);
+      font-size: clamp(3.1rem, 7.4vw, 5.9rem);
+      font-weight: 850;
+      line-height: 0.95;
+      text-shadow: 0 0 22px rgba(53, 242, 141, 0.34);
+      font-variant-numeric: tabular-nums;
+      white-space: nowrap;
+    }
+
+    .timer-subline {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px 12px;
+      align-items: center;
+      margin-top: 14px;
+      color: var(--muted);
+      font-size: 0.94rem;
+    }
+
+    .mode-tag {
+      display: inline-flex;
+      align-items: center;
+      height: 28px;
+      padding: 0 10px;
+      color: var(--green);
+      background: rgba(53, 242, 141, 0.1);
+      border: 1px solid rgba(53, 242, 141, 0.22);
+      border-radius: 999px;
+      font-size: 0.8rem;
+      font-weight: 800;
+    }
+
+    .session-meta {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      min-height: 70px;
+      padding: 16px 0;
+      border-top: 1px solid var(--line-soft);
+      border-bottom: 1px solid var(--line-soft);
+    }
+
+    .session-meta .icon-badge {
+      display: grid;
+      place-items: center;
+      width: 40px;
+      height: 40px;
+      color: var(--green);
+      background: var(--green-soft);
+      border: 1px solid rgba(53, 242, 141, 0.2);
+      border-radius: 50%;
+    }
+
+    .session-name-field {
+      display: grid;
+      gap: 6px;
+      width: min(100%, 430px);
+      min-width: 0;
+    }
+
+    .session-meta small,
+    .setting-label small {
+      display: block;
+      color: var(--muted);
+      font-size: 0.82rem;
+    }
+
+    .session-name-input {
+      width: 100%;
+      min-width: 0;
+      height: 42px;
+      padding: 0 12px;
+      color: var(--text);
+      background: rgba(0, 0, 0, 0.18);
+      border: 1px solid transparent;
+      border-radius: 7px;
+      outline: none;
+      font-size: 1.08rem;
+      font-weight: 850;
+      box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.05);
+      transition: border-color 160ms ease, box-shadow 160ms ease, background 160ms ease;
+    }
+
+    .session-name-input:hover {
+      border-color: rgba(53, 242, 141, 0.18);
+      background: rgba(0, 0, 0, 0.22);
+    }
+
+    .session-name-input:focus {
+      border-color: rgba(53, 242, 141, 0.52);
+      box-shadow: 0 0 0 3px rgba(53, 242, 141, 0.12);
+    }
+
+    .session-name-input::placeholder {
+      color: var(--faint);
+    }
+
+    .action-row {
+      display: grid;
+      grid-template-columns: minmax(190px, 1.45fr) minmax(112px, 0.78fr) minmax(130px, 0.86fr);
+      gap: 10px;
+      margin-top: 18px;
+    }
+
+    .action-button,
+    .step-button,
+    .quick-chip,
+    .details-button {
+      border: 0;
+      cursor: pointer;
+      transition: transform 160ms ease, filter 160ms ease, border-color 160ms ease, background 160ms ease;
+    }
+
+    .action-button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 9px;
+      min-height: 48px;
+      padding: 0 16px;
+      color: var(--text);
+      border-radius: 7px;
+      font-weight: 850;
+      white-space: nowrap;
+    }
+
+    .action-button:hover,
+    .step-button:hover,
+    .quick-chip:hover,
+    .details-button:hover {
+      transform: translateY(-1px);
+      filter: brightness(1.06);
+    }
+
+    .action-button:active,
+    .step-button:active,
+    .quick-chip:active,
+    .details-button:active {
+      transform: translateY(0);
+    }
+
+    .action-button.primary {
+      min-height: 54px;
+      color: #06140d;
+      background: linear-gradient(180deg, #62ffad, var(--green-2));
+      box-shadow: 0 0 26px rgba(53, 242, 141, 0.34), inset 0 1px 0 rgba(255, 255, 255, 0.32);
+    }
+
+    .action-button.warning {
+      color: #201700;
+      background: linear-gradient(180deg, #ffe27a, var(--yellow));
+      box-shadow: 0 0 18px rgba(245, 201, 75, 0.19);
+    }
+
+    .action-button.danger {
+      color: white;
+      background: linear-gradient(180deg, #ff6868, var(--red));
+      box-shadow: 0 0 18px rgba(239, 78, 78, 0.2);
+    }
+
+    .action-button:disabled {
+      cursor: not-allowed;
+      opacity: 0.45;
+      transform: none;
+      filter: none;
+    }
+
+    .setting-block {
+      display: grid;
+      gap: 12px;
+      padding: 18px 0;
+      border-top: 1px solid var(--line-soft);
+    }
+
+    .setting-block:first-of-type {
+      border-top: 0;
+      padding-top: 0;
+    }
+
+    .setting-label {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 12px;
+      color: var(--text);
+      font-weight: 800;
+    }
+
+    .setting-label small {
+      text-align: right;
+      white-space: nowrap;
+    }
+
+    .stepper {
+      display: grid;
+      grid-template-columns: 44px minmax(0, 1fr) 44px;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .step-button {
+      display: grid;
+      place-items: center;
+      width: 44px;
+      height: 44px;
+      color: var(--text);
+      background: var(--btn-bg);
+      border: 1px solid var(--line);
+      border-radius: 7px;
+      font-size: 1.3rem;
+      font-weight: 700;
+      box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.07);
+    }
+
+    .duration-value {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-width: 0;
+      height: 44px;
+      padding: 0 12px;
+      color: var(--text);
+      background: rgba(0, 0, 0, 0.18);
+      border: 1px solid var(--line);
+      border-radius: 7px;
+      font-weight: 850;
+      font-variant-numeric: tabular-nums;
+      white-space: nowrap;
+    }
+
+    .quick-row {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 8px;
+    }
+
+    .quick-chip {
+      min-height: 44px;
+      padding: 0 10px;
+      color: var(--muted);
+      background: var(--btn-bg);
+      border: 1px solid var(--line);
+      border-radius: 7px;
+      font-weight: 750;
+      white-space: nowrap;
+    }
+
+    .quick-chip.is-active {
+      color: #07140e;
+      background: linear-gradient(180deg, var(--green-bright), var(--green));
+      border-color: rgba(53, 242, 141, 0.72);
+      box-shadow: 0 0 18px rgba(53, 242, 141, 0.22);
+    }
+
+    .settings-note {
+      margin: 2px 0 0;
+      color: var(--muted);
+      font-size: 0.86rem;
+      line-height: 1.45;
+    }
+
+    .table-wrap {
+      overflow-x: auto;
+    }
+
+    table {
+      width: 100%;
+      min-width: 0;
+      border-collapse: collapse;
+      table-layout: fixed;
+    }
+
+    th,
+    td {
+      padding: 13px 8px;
+      text-align: left;
+      border-bottom: 1px solid var(--line-soft);
+      white-space: nowrap;
+    }
+
+    th {
+      color: var(--muted);
+      font-size: 0.8rem;
+      font-weight: 850;
+      text-transform: uppercase;
+    }
+
+    td {
+      color: var(--text);
+      font-size: 0.9rem;
+      font-variant-numeric: tabular-nums;
+    }
+
+    th:nth-child(1),
+    td:nth-child(1) {
+      width: 96px;
+    }
+
+    th:nth-child(2),
+    td:nth-child(2) {
+      width: 20%;
+      min-width: 128px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    th:nth-child(3),
+    td:nth-child(3) {
+      width: 76px;
+    }
+
+    th:nth-child(4),
+    td:nth-child(4) {
+      width: 82px;
+    }
+
+    th:nth-child(5),
+    td:nth-child(5) {
+      width: 92px;
+    }
+
+    th:nth-child(6),
+    td:nth-child(6) {
+      width: 82px;
+    }
+
+    th:nth-child(7),
+    td:nth-child(7) {
+      width: 78px;
+    }
+
+    th:nth-child(8),
+    td:nth-child(8) {
+      width: 124px;
+    }
+
+    tbody tr {
+      transition: background 160ms ease;
+    }
+
+    tbody tr:hover {
+      background: rgba(255, 255, 255, 0.025);
+    }
+
+    .status {
+      display: inline-flex;
+      align-items: center;
+      min-height: 26px;
+      padding: 0 10px;
+      border-radius: 999px;
+      font-size: 0.82rem;
+      font-weight: 800;
+    }
+
+    .status.completed {
+      color: var(--green);
+      background: var(--green-soft);
+    }
+
+    .status.paused {
+      color: var(--yellow);
+      background: var(--yellow-soft);
+    }
+
+    .status.ended {
+      color: var(--red-pale);
+      background: var(--red-soft);
+    }
+
+    .details-button {
+      min-height: 44px;
+      padding: 0 12px;
+      color: var(--text);
+      background: var(--btn-bg);
+      border: 1px solid var(--line);
+      border-radius: 7px;
+      font-weight: 750;
+    }
+
+    .command-button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 40px;
+      padding: 0 14px;
+      color: #07140e;
+      background: linear-gradient(180deg, var(--green-bright), var(--green));
+      border: 0;
+      border-radius: 7px;
+      box-shadow: 0 0 18px rgba(53, 242, 141, 0.2);
+      cursor: pointer;
+      font-weight: 850;
+      white-space: nowrap;
+      transition: transform 160ms ease, filter 160ms ease;
+    }
+
+    .command-button:hover {
+      transform: translateY(-1px);
+      filter: brightness(1.06);
+    }
+
+    .table-actions {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+      justify-content: flex-end;
+    }
+
+    .table-actions .details-button {
+      min-height: 38px;
+      padding: 0 9px;
+      font-size: 0.82rem;
+    }
+
+    .details-button.danger-link {
+      color: var(--red-pale);
+      background: rgba(239, 78, 78, 0.1);
+      border-color: rgba(239, 78, 78, 0.22);
+    }
+
+    .report-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+      gap: 12px;
+      margin-bottom: 18px;
+    }
+
+    .report-card.featured {
+      background: linear-gradient(135deg, rgba(53, 242, 141, 0.08), rgba(0, 0, 0, 0.16));
+      border-color: rgba(53, 242, 141, 0.2);
+    }
+
+    .report-card.featured strong {
+      font-size: 1.62rem;
+    }
+
+    .report-card {
+      min-height: 118px;
+      padding: 16px;
+      background: rgba(0, 0, 0, 0.16);
+      border: 1px solid var(--line-soft);
+      border-radius: var(--radius);
+    }
+
+    .report-card span {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 34px;
+      height: 34px;
+      margin-bottom: 12px;
+      color: var(--green);
+      background: var(--green-soft);
+      border: 1px solid rgba(53, 242, 141, 0.18);
+      border-radius: 8px;
+    }
+
+    .report-card small {
+      display: block;
+      color: var(--muted);
+      font-weight: 750;
+    }
+
+    .report-card strong {
+      display: block;
+      margin-top: 5px;
+      color: var(--text);
+      font-size: 1.35rem;
+      line-height: 1.1;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .game-performance {
+      display: grid;
+      gap: 12px;
+      padding-top: 2px;
+    }
+
+    .performance-row {
+      display: grid;
+      grid-template-columns: minmax(130px, 170px) minmax(0, 1fr) 82px;
+      gap: 12px;
+      align-items: center;
+      min-height: 38px;
+    }
+
+    .performance-row b {
+      color: var(--text);
+      font-size: 0.92rem;
+    }
+
+    .bar-track {
+      overflow: hidden;
+      height: 9px;
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 999px;
+    }
+
+    .bar-fill {
+      display: block;
+      width: var(--value);
+      height: 100%;
+      background: linear-gradient(90deg, var(--green-2), var(--green));
+      border-radius: inherit;
+      box-shadow: 0 0 18px rgba(53, 242, 141, 0.24);
+    }
+
+    .bar-fill.negative {
+      background: linear-gradient(90deg, #b82f35, var(--red));
+      box-shadow: 0 0 18px rgba(239, 78, 78, 0.2);
+    }
+
+    .performance-row em {
+      color: var(--green);
+      font-style: normal;
+      font-weight: 850;
+      text-align: right;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .performance-row em.negative {
+      color: var(--red);
+    }
+
+    .modal-backdrop {
+      position: fixed;
+      inset: 0;
+      z-index: 60;
+      display: none;
+      place-items: center;
+      padding: 20px;
+      background: rgba(0, 0, 0, 0.66);
+      backdrop-filter: blur(10px);
+    }
+
+    .modal-backdrop.open {
+      display: grid;
+    }
+
+    .modal-backdrop.confirm-backdrop {
+      z-index: 90;
+      background: rgba(0, 0, 0, 0.78);
+    }
+
+    .modal {
+      width: min(560px, 100%);
+      padding: 22px;
+      background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.055), transparent 32%),
+        var(--panel);
+      border: 1px solid var(--line-soft);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+    }
+
+    .modal-head {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 18px;
+    }
+
+    .modal-title {
+      margin: 0;
+      color: var(--text);
+      font-size: 1.35rem;
+      font-weight: 900;
+    }
+
+    .modal-subtitle {
+      margin: 5px 0 0;
+      color: var(--muted);
+      line-height: 1.4;
+    }
+
+    .confirm-modal {
+      width: min(430px, 100%);
+      border-color: rgba(239, 78, 78, 0.38);
+      box-shadow: 0 24px 80px rgba(0, 0, 0, 0.42), 0 0 34px rgba(239, 78, 78, 0.12);
+    }
+
+    .confirm-modal .modal-head {
+      margin-bottom: 12px;
+    }
+
+    .confirm-message {
+      margin: 0 0 18px;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    .modal-close {
+      display: grid;
+      place-items: center;
+      width: 44px;
+      height: 44px;
+      color: var(--muted);
+      background: var(--btn-bg);
+      border: 1px solid var(--line);
+      border-radius: 7px;
+      cursor: pointer;
+      font-size: 1.2rem;
+      line-height: 1;
+    }
+
+    .session-form {
+      display: grid;
+      gap: 14px;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .form-field {
+      display: grid;
+      gap: 7px;
+      min-width: 0;
+      color: var(--muted);
+      font-size: 0.82rem;
+      font-weight: 800;
+    }
+
+    .form-field.full {
+      grid-column: 1 / -1;
+    }
+
+    .form-field input,
+    .form-field select {
+      width: 100%;
+      min-width: 0;
+      height: 44px;
+      padding: 0 12px;
+      color: var(--text);
+      background: rgba(0, 0, 0, 0.18);
+      border: 1px solid var(--line);
+      border-radius: 7px;
+      outline: none;
+      font: inherit;
+      font-weight: 750;
+    }
+
+    .form-field input:focus,
+    .form-field select:focus {
+      border-color: rgba(53, 242, 141, 0.52);
+      box-shadow: 0 0 0 3px rgba(53, 242, 141, 0.12);
+    }
+
+    .form-field input[readonly] {
+      color: var(--muted);
+      background: rgba(255, 255, 255, 0.04);
+      border-color: rgba(255, 255, 255, 0.08);
+      cursor: default;
+    }
+
+    .form-note {
+      margin: 0;
+      color: var(--muted);
+      font-size: 0.86rem;
+      line-height: 1.45;
+    }
+
+    .modal-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      padding-top: 4px;
+    }
+
+    .ghost-button {
+      min-height: 42px;
+      padding: 0 14px;
+      color: var(--muted);
+      background: var(--btn-bg);
+      border: 1px solid var(--line);
+      border-radius: 7px;
+      cursor: pointer;
+      font-weight: 800;
+    }
+
+    .danger-button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 42px;
+      padding: 0 16px;
+      color: white;
+      background: linear-gradient(180deg, #ff6868, var(--red));
+      border: 0;
+      border-radius: 7px;
+      box-shadow: 0 0 18px rgba(239, 78, 78, 0.2);
+      cursor: pointer;
+      font-weight: 850;
+      white-space: nowrap;
+      transition: transform 160ms ease, filter 160ms ease;
+    }
+
+    .danger-button:hover,
+    .ghost-button:hover {
+      transform: translateY(-1px);
+      filter: brightness(1.06);
+    }
+
+    @media (max-width: 1120px) {
+      .topbar {
+        align-items: stretch;
+        flex-wrap: wrap;
+        gap: 10px;
+        padding: 14px;
+      }
+
+      .brand,
+      .profile {
+        min-width: 0;
+      }
+
+      .nav {
+        order: 3;
+        width: 100%;
+        justify-content: flex-start;
+        overflow-x: auto;
+        padding-bottom: 2px;
+      }
+
+      .report-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 760px) {
+      .app {
+        width: min(100% - 20px, 1380px);
+        padding-top: 10px;
+      }
+
+      .topbar {
+        position: static;
+      }
+
+      .brand span {
+        font-size: 0.98rem;
+      }
+
+      .profile {
+        display: none;
+      }
+
+      .nav-link {
+        height: 44px;
+        padding: 0 10px;
+        font-size: 0.92rem;
+      }
+
+      .dashboard-grid {
+        grid-template-columns: 1fr;
+        grid-template-areas:
+          "route"
+          "control"
+          "stats";
+        gap: 14px;
+      }
+
+      .dashboard-grid[data-route="dashboard"],
+      .dashboard-grid[data-route="sessions"],
+      .dashboard-grid[data-route="reports"],
+      .dashboard-grid[data-route="settings"] {
+        grid-template-columns: 1fr;
+      }
+
+      .dashboard-grid[data-route="dashboard"] {
+        grid-template-areas:
+          "route"
+          "control"
+          "stats";
+      }
+
+      .dashboard-grid[data-route="sessions"] {
+        grid-template-areas:
+          "route"
+          "log";
+      }
+
+      .dashboard-grid[data-route="reports"] {
+        grid-template-areas:
+          "route"
+          "reports";
+      }
+
+      .dashboard-grid[data-route="settings"] {
+        grid-template-areas:
+          "route"
+          "settings";
+      }
+
+      .route-header {
+        align-items: flex-start;
+        flex-direction: column;
+        min-height: auto;
+        padding: 18px;
+      }
+
+      .control-panel,
+      .settings-panel,
+      .stats-panel,
+      .log-panel,
+      .reports-panel {
+        padding: 18px;
+      }
+
+      .report-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .performance-row {
+        grid-template-columns: 1fr;
+        gap: 7px;
+      }
+
+      .performance-row em {
+        text-align: left;
+      }
+
+      .form-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .modal-actions {
+        flex-direction: column-reverse;
+      }
+
+      .modal-actions .command-button,
+      .modal-actions .danger-button,
+      .modal-actions .ghost-button {
+        width: 100%;
+      }
+
+      table {
+        table-layout: auto;
+      }
+
+      th:nth-child(6),
+      td:nth-child(6),
+      th:nth-child(7),
+      td:nth-child(7) {
+        display: none;
+      }
+
+      .panel-head {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+
+      .timer-stage {
+        grid-template-columns: 1fr;
+        justify-items: center;
+        text-align: center;
+      }
+
+      .timer-subline {
+        justify-content: center;
+      }
+
+      .session-meta {
+        align-items: flex-start;
+      }
+
+      .action-row {
+        grid-template-columns: 1fr;
+      }
+
+      .timer-readout {
+        font-size: clamp(2.65rem, 15vw, 4.6rem);
+      }
+    }
+
+    @media (max-width: 420px) {
+      .quick-row {
+        grid-template-columns: 1fr;
+      }
+
+      .timer-readout {
+        font-size: clamp(2.25rem, 13vw, 3.2rem);
+      }
+    }
+  </style>
+</head>
+<body>
+  <svg aria-hidden="true" style="position:absolute;width:0;height:0;overflow:hidden">
+    <defs>
+      <linearGradient id="ringGradient" x1="0%" x2="100%" y1="0%" y2="100%">
+        <stop offset="0%" stop-color="#a6ffd0"></stop>
+        <stop offset="50%" stop-color="#35f28d"></stop>
+        <stop offset="100%" stop-color="#0fc66f"></stop>
+      </linearGradient>
+      <symbol id="icon-spade" viewBox="0 0 24 24">
+        <path fill="currentColor" d="M12 2.4c-4.9 3.9-8 7-8 10.2A5 5 0 0 0 12 16.7a5 5 0 0 0 8-4.1c0-3.2-3.1-6.3-8-10.2Zm-1.8 14.2c-.3 1.7-1 3.1-2.1 4.1v.9h7.8v-.9c-1.1-1-1.8-2.4-2.1-4.1a6.7 6.7 0 0 1-3.6 0Z"></path>
+      </symbol>
+      <symbol id="icon-grid" viewBox="0 0 24 24">
+        <path fill="currentColor" d="M4 4h7v7H4V4Zm9 0h7v7h-7V4ZM4 13h7v7H4v-7Zm9 0h7v7h-7v-7Z"></path>
+      </symbol>
+      <symbol id="icon-clock" viewBox="0 0 24 24">
+        <path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 7v5l3 2m6-2a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z"></path>
+      </symbol>
+      <symbol id="icon-report" viewBox="0 0 24 24">
+        <path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 3h9l3 3v15H6V3Zm8 0v4h4M9 17v-5m3 5V9m3 8v-3"></path>
+      </symbol>
+      <symbol id="icon-user" viewBox="0 0 24 24">
+        <path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 21a8 8 0 0 0-16 0m12-13a4 4 0 1 1-8 0 4 4 0 0 1 8 0Z"></path>
+      </symbol>
+      <symbol id="icon-settings" viewBox="0 0 24 24">
+        <path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15.5a3.5 3.5 0 1 0 0-7 3.5 3.5 0 0 0 0 7Zm0-13v3m0 13v3m9.5-9.5h-3m-13 0h-3m16.2-6.7-2.1 2.1M7.4 16.6l-2.1 2.1m13.4 0-2.1-2.1M7.4 7.4 5.3 5.3"></path>
+      </symbol>
+      <symbol id="icon-calendar" viewBox="0 0 24 24">
+        <path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 3v3m10-3v3M4 9h16M5 5h14a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1Z"></path>
+      </symbol>
+      <symbol id="icon-bankroll" viewBox="0 0 24 24">
+        <path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7h16v10H4V7Zm3 3h.01M17 14h.01M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z"></path>
+      </symbol>
+      <symbol id="icon-trend" viewBox="0 0 24 24">
+        <path fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m4 16 5-5 4 4 7-8m0 0h-5m5 0v5"></path>
+      </symbol>
+      <symbol id="icon-play" viewBox="0 0 24 24">
+        <path fill="currentColor" d="M8 5.4v13.2c0 .8.9 1.3 1.6.9l10.1-6.6a1.1 1.1 0 0 0 0-1.8L9.6 4.5C8.9 4.1 8 4.6 8 5.4Z"></path>
+      </symbol>
+      <symbol id="icon-pause" viewBox="0 0 24 24">
+        <path fill="currentColor" d="M7 5h4v14H7V5Zm6 0h4v14h-4V5Z"></path>
+      </symbol>
+      <symbol id="icon-stop" viewBox="0 0 24 24">
+        <path fill="currentColor" d="M6 6h12v12H6V6Z"></path>
+      </symbol>
+      <symbol id="icon-timer" viewBox="0 0 24 24">
+        <path fill="currentColor" d="M9 2h6v2H9V2Zm2 8h2v5h-2v-5Z"></path>
+        <path fill="currentColor" d="M12 5a8 8 0 1 0 0 16 8 8 0 0 0 0-16Zm0 14a6 6 0 1 1 0-12 6 6 0 0 1 0 12Z"></path>
+      </symbol>
+    </defs>
+  </svg>
+
+  <div class="app">
+    <header class="topbar" aria-label="Topo">
+      <a class="brand" href="#dashboard" data-nav="dashboard" aria-label="POKERDORO dashboard">
+        <span class="logo-mark"><svg aria-hidden="true"><use href="#icon-spade"></use></svg></span>
+        <span>POKERDORO</span>
+      </a>
+
+      <nav class="nav" aria-label="Principal">
+        <a class="nav-link active" href="#dashboard" data-nav="dashboard"><svg class="icon" aria-hidden="true"><use href="#icon-grid"></use></svg>Dashboard</a>
+        <a class="nav-link" href="#sessions" data-nav="sessions"><svg class="icon" aria-hidden="true"><use href="#icon-clock"></use></svg>Sess&otilde;es</a>
+        <a class="nav-link" href="#reports" data-nav="reports"><svg class="icon" aria-hidden="true"><use href="#icon-report"></use></svg>Relat&oacute;rios</a>
+        <a class="nav-link" href="#settings" data-nav="settings"><svg class="icon" aria-hidden="true"><use href="#icon-settings"></use></svg>Configura&ccedil;&otilde;es</a>
+      </nav>
+
+      <div class="profile" aria-label="Perfil">
+        <span class="status-dot" aria-hidden="true"></span>
+        <button class="profile-button" type="button" id="profileBtn" aria-label="Abrir perfil" aria-haspopup="true" aria-expanded="false">
+          <svg class="icon" aria-hidden="true"><use href="#icon-user"></use></svg>
+        </button>
+        <div class="profile-menu" id="profileMenu" role="menu" aria-label="Menu do perfil">
+          <div class="profile-name">Renan<small>Jogador online</small></div>
+          <button type="button" role="menuitem" data-profile-action="bankroll">Bankroll</button>
+          <button type="button" role="menuitem" data-profile-action="export">Exportar dados</button>
+          <button type="button" role="menuitem" data-profile-action="logout">Sair</button>
+        </div>
+      </div>
+    </header>
+
+    <main class="dashboard-grid" id="workspace" data-route="dashboard" tabindex="-1">
+      <section class="route-header" aria-live="polite" aria-labelledby="routeTitle">
+        <div>
+          <p class="section-kicker" id="routeKicker">Dashboard</p>
+          <h1 class="route-title" id="routeTitle">Dashboard</h1>
+          <p class="route-description" id="routeDescription">Vis&atilde;o operacional da sess&atilde;o atual, bankroll e ritmo de grind.</p>
+        </div>
+        <span class="route-badge" id="routeBadge">Ao vivo</span>
+      </section>
+
+      <aside class="panel stats-panel" aria-labelledby="stats-title">
+        <h2 class="section-kicker" id="stats-title">Vis&atilde;o geral</h2>
+        <ul class="stat-list">
+          <li class="stat-item">
+            <span class="stat-icon"><svg class="icon" aria-hidden="true"><use href="#icon-calendar"></use></svg></span>
+            <div>
+              <p class="stat-label">Total de Sess&otilde;es</p>
+              <p class="stat-value" id="statTotalSessions">87</p>
+            </div>
+          </li>
+          <li class="stat-item">
+            <span class="stat-icon"><svg class="icon" aria-hidden="true"><use href="#icon-clock"></use></svg></span>
+            <div>
+              <p class="stat-label">Tempo Total</p>
+              <p class="stat-value" id="statTotalTime">112h</p>
+            </div>
+          </li>
+          <li class="stat-item">
+            <span class="stat-icon"><svg class="icon" aria-hidden="true"><use href="#icon-bankroll"></use></svg></span>
+            <div>
+              <p class="stat-label">Lucro L&iacute;quido</p>
+              <p class="stat-value positive" id="statNetProfit">+$2.450</p>
+            </div>
+          </li>
+          <li class="stat-item">
+            <span class="stat-icon"><svg class="icon" aria-hidden="true"><use href="#icon-trend"></use></svg></span>
+            <div>
+              <p class="stat-label">M&eacute;dia por Sess&atilde;o</p>
+              <p class="stat-value positive" id="statAvgSession">+$28.16</p>
+            </div>
+          </li>
+          <li class="stat-item">
+            <span class="stat-icon"><svg class="icon" aria-hidden="true"><use href="#icon-timer"></use></svg></span>
+            <div>
+              <p class="stat-label">Grind Semanal</p>
+              <p class="stat-value" id="statWeeklyGrind">0h</p>
+              <p class="stat-label" id="statWeeklyRemaining" style="margin-top:3px">Faltam 40h</p>
+            </div>
+          </li>
+        </ul>
+      </aside>
+
+      <section class="panel control-panel" aria-labelledby="control-title">
+        <div class="panel-head">
+          <div class="panel-title-block">
+            <h2 class="section-title" id="control-title">Controle da Sess&atilde;o</h2>
+            <p class="panel-caption">Sess&atilde;o Atual: <span id="sessionCaptionName">PLO5 Cash Game</span></p>
+          </div>
+          <span class="live-pill" id="statusPill" aria-live="polite">Pronta</span>
+        </div>
+
+        <div class="timer-stage">
+          <div class="dial" aria-hidden="true">
+            <svg class="progress-ring" viewBox="0 0 140 140">
+              <circle class="progress-ring__track" cx="70" cy="70" r="58" pathLength="100"></circle>
+              <circle class="progress-ring__bar" id="progressRing" cx="70" cy="70" r="58" pathLength="100"></circle>
+            </svg>
+            <span class="dial-core">
+              <svg class="icon" aria-hidden="true"><use href="#icon-timer"></use></svg>
+            </span>
+          </div>
+
+          <div class="timer-copy">
+            <p class="timer-label" id="timerModeLabel">Pomodoro Timer</p>
+            <p class="timer-readout" id="timerDisplay">01:00:00</p>
+            <div class="timer-subline">
+              <span class="mode-tag" id="modeTag">Sess&atilde;o</span>
+              <span id="phaseText">Foco ativo com pausa configurada em 15m</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="session-meta">
+          <span class="icon-badge"><svg class="icon" aria-hidden="true"><use href="#icon-spade"></use></svg></span>
+          <label class="session-name-field" for="sessionNameInput">
+            <small>Sess&atilde;o Atual</small>
+            <input class="session-name-input" id="sessionNameInput" type="text" value="PLO5 Cash Game" maxlength="42" autocomplete="off" placeholder="Ex: NLH cash, PLO5, MTT turbo">
+          </label>
+        </div>
+
+        <div class="action-row">
+          <button class="action-button primary" type="button" id="startBtn">
+            <svg class="icon" aria-hidden="true"><use href="#icon-play"></use></svg>
+            <span id="startLabel">START SESSION</span>
+          </button>
+          <button class="action-button warning" type="button" id="pauseBtn" disabled>
+            <svg class="icon" aria-hidden="true"><use href="#icon-pause"></use></svg>
+            <span id="pauseLabel">Pause</span>
+          </button>
+          <button class="action-button danger" type="button" id="endBtn">
+            <svg class="icon" aria-hidden="true"><use href="#icon-stop"></use></svg>
+            End Session
+          </button>
+        </div>
+      </section>
+
+      <aside class="panel settings-panel" id="settings" tabindex="-1" aria-labelledby="settings-title">
+        <div class="panel-head">
+          <div class="panel-title-block">
+            <h2 class="section-title" id="settings-title">Pomodoro</h2>
+            <p class="panel-caption">Ajuste os ciclos antes ou durante o grind.</p>
+          </div>
+        </div>
+
+        <div class="setting-block">
+          <div class="setting-label">
+            <span>Tempo de Sess&atilde;o</span>
+            <small>Padr&atilde;o 1h</small>
+          </div>
+          <div class="stepper">
+            <button class="step-button" type="button" data-adjust="session" data-delta="-5" aria-label="Diminuir tempo de sessao">-</button>
+            <span class="duration-value" id="sessionValue">1h</span>
+            <button class="step-button" type="button" data-adjust="session" data-delta="5" aria-label="Aumentar tempo de sessao">+</button>
+          </div>
+          <div class="quick-row" aria-label="Atalhos de tempo de sessao">
+            <button class="quick-chip" type="button" data-preset="session" data-minutes="55">55m</button>
+            <button class="quick-chip is-active" type="button" data-preset="session" data-minutes="60">1h</button>
+            <button class="quick-chip" type="button" data-preset="session" data-minutes="75">1h15m</button>
+          </div>
+        </div>
+
+        <div class="setting-block">
+          <div class="setting-label">
+            <span>Tempo de Pausa</span>
+            <small>Padr&atilde;o 15m</small>
+          </div>
+          <div class="stepper">
+            <button class="step-button" type="button" data-adjust="break" data-delta="-5" aria-label="Diminuir tempo de pausa">-</button>
+            <span class="duration-value" id="breakValue">15m</span>
+            <button class="step-button" type="button" data-adjust="break" data-delta="5" aria-label="Aumentar tempo de pausa">+</button>
+          </div>
+          <div class="quick-row" aria-label="Atalhos de tempo de pausa">
+            <button class="quick-chip" type="button" data-preset="break" data-minutes="10">10m</button>
+            <button class="quick-chip is-active" type="button" data-preset="break" data-minutes="15">15m</button>
+            <button class="quick-chip" type="button" data-preset="break" data-minutes="20">20m</button>
+          </div>
+        </div>
+
+        <p class="settings-note">Ao alterar uma dura&ccedil;&atilde;o com o timer parado, o cron&ocirc;metro principal mostra o ciclo selecionado.</p>
+      </aside>
+
+      <section class="panel log-panel" id="sessions" tabindex="-1" aria-labelledby="log-title">
+        <div class="panel-head">
+          <div class="panel-title-block">
+            <h2 class="section-title" id="log-title">Registro de Sess&otilde;es</h2>
+            <p class="panel-caption">Sess&otilde;es recentes e resultado l&iacute;quido.</p>
+          </div>
+          <button class="command-button" type="button" id="addSessionBtn">Nova sess&atilde;o</button>
+        </div>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Data</th>
+                <th>Modalidade</th>
+                <th>Dura&ccedil;&atilde;o</th>
+                <th>M&atilde;os</th>
+                <th>Lucro L&iacute;quido</th>
+                <th>EV bb/100</th>
+                <th>Rake</th>
+                <th>A&ccedil;&otilde;es</th>
+              </tr>
+            </thead>
+            <tbody id="sessionRows"></tbody>
+          </table>
+        </div>
+      </section>
+
+      <section class="panel reports-panel" id="reports" tabindex="-1" aria-labelledby="reports-title">
+        <div class="panel-head">
+          <div class="panel-title-block">
+            <h2 class="section-title" id="reports-title">Relat&oacute;rios</h2>
+            <p class="panel-caption">Leitura r&aacute;pida de performance por volume, ROI e modalidade.</p>
+          </div>
+          <span class="live-pill">30 dias</span>
+        </div>
+
+        <div class="report-grid" aria-label="M&eacute;tricas de relat&oacute;rio">
+          <article class="report-card featured">
+            <span><svg class="icon" aria-hidden="true"><use href="#icon-trend"></use></svg></span>
+            <small>ROI do Per&iacute;odo</small>
+            <strong class="positive" id="reportRoi">+18.4%</strong>
+          </article>
+          <article class="report-card featured">
+            <span><svg class="icon" aria-hidden="true"><use href="#icon-spade"></use></svg></span>
+            <small>Taxa de Vit&oacute;ria</small>
+            <strong class="positive" id="reportWinRate">50%</strong>
+          </article>
+          <article class="report-card">
+            <span><svg class="icon" aria-hidden="true"><use href="#icon-clock"></use></svg></span>
+            <small>Horas Grindadas</small>
+            <strong id="reportHours">42h</strong>
+          </article>
+          <article class="report-card">
+            <span><svg class="icon" aria-hidden="true"><use href="#icon-report"></use></svg></span>
+            <small>M&atilde;os Jogadas</small>
+            <strong id="reportHands">0</strong>
+          </article>
+          <article class="report-card">
+            <span><svg class="icon" aria-hidden="true"><use href="#icon-trend"></use></svg></span>
+            <small>EV do Per&iacute;odo</small>
+            <strong class="positive" id="reportEv">+$0</strong>
+          </article>
+          <article class="report-card">
+            <span><svg class="icon" aria-hidden="true"><use href="#icon-grid"></use></svg></span>
+            <small>EV bb/100</small>
+            <strong class="positive" id="reportEvBb100">0.0</strong>
+          </article>
+          <article class="report-card">
+            <span><svg class="icon" aria-hidden="true"><use href="#icon-bankroll"></use></svg></span>
+            <small>Rake Pago</small>
+            <strong id="reportRake">$0</strong>
+          </article>
+          <article class="report-card">
+            <span><svg class="icon" aria-hidden="true"><use href="#icon-bankroll"></use></svg></span>
+            <small>Melhor Sess&atilde;o</small>
+            <strong class="positive" id="reportBest">+$410</strong>
+          </article>
+        </div>
+
+        <div class="game-performance" id="gamePerformance" aria-label="Performance por modalidade"></div>
+      </section>
+    </main>
+  </div>
+
+  <div class="modal-backdrop" id="startSessionModal" aria-hidden="true">
+    <section class="modal" role="dialog" aria-modal="true" aria-labelledby="startSessionTitle">
+      <div class="modal-head">
+        <div>
+          <h2 class="modal-title" id="startSessionTitle">Iniciar sess&atilde;o</h2>
+          <p class="modal-subtitle">Defina a modalidade e o valor atual da banca antes do timer come&ccedil;ar.</p>
+        </div>
+        <button class="modal-close" type="button" id="closeStartModal" aria-label="Fechar">x</button>
+      </div>
+
+      <form class="session-form" id="startSessionForm">
+        <div class="form-grid">
+          <label class="form-field full">
+            Modalidade
+            <input id="startGame" type="text" maxlength="42" required placeholder="Ex: PLO5 Cash Game">
+          </label>
+          <label class="form-field full">
+            Valor atual da banca ($)
+            <input id="startBankroll" type="number" min="0" step="0.01" required placeholder="Ex: 10000">
+          </label>
+        </div>
+        <p class="form-note">A dura&ccedil;&atilde;o ser&aacute; calculada pela hora real de in&iacute;cio e fim da sess&atilde;o.</p>
+        <div class="modal-actions">
+          <button class="ghost-button" type="button" id="cancelStartModal">Cancelar</button>
+          <button class="command-button" type="submit">Iniciar timer</button>
+        </div>
+      </form>
+    </section>
+  </div>
+
+  <div class="modal-backdrop" id="sessionModal" aria-hidden="true">
+    <section class="modal" role="dialog" aria-modal="true" aria-labelledby="sessionModalTitle">
+      <div class="modal-head">
+        <div>
+          <h2 class="modal-title" id="sessionModalTitle">Finalizar sess&atilde;o</h2>
+          <p class="modal-subtitle" id="sessionModalSubtitle">Informe o lucro ou preju&iacute;zo para atualizar seus relat&oacute;rios.</p>
+        </div>
+        <button class="modal-close" type="button" id="closeSessionModal" aria-label="Fechar">x</button>
+      </div>
+
+      <form class="session-form" id="sessionForm">
+        <input type="hidden" id="modalSessionId">
+        <div class="form-grid">
+          <label class="form-field full">
+            Modalidade
+            <input id="modalGame" type="text" maxlength="42" required>
+          </label>
+          <label class="form-field">
+            Data
+            <input id="modalDate" type="date" required>
+          </label>
+          <label class="form-field">
+            Dura&ccedil;&atilde;o em minutos
+            <input id="modalDuration" type="number" min="1" step="1" required>
+          </label>
+          <label class="form-field">
+            Banca inicial ($)
+            <input id="modalBankrollStart" type="number" min="0" step="0.01" required>
+          </label>
+          <label class="form-field">
+            Banca ap&oacute;s a sess&atilde;o ($)
+            <input id="modalBankrollEnd" type="number" min="0" step="0.01" required>
+          </label>
+          <label class="form-field">
+            M&atilde;os jogadas
+            <input id="modalHands" type="number" min="0" step="1" required>
+          </label>
+          <label class="form-field">
+            Won EV ($)
+            <input id="modalEvProfit" type="number" step="0.01" placeholder="Ex: 25946">
+          </label>
+          <label class="form-field">
+            EV bb/100
+            <input id="modalEvBb100" type="number" step="0.01" placeholder="Ex: 8.6">
+          </label>
+          <label class="form-field">
+            Rake paid ($)
+            <input id="modalRakePaid" type="number" min="0" step="0.01" placeholder="Ex: 16.95">
+          </label>
+          <label class="form-field">
+            Lucro / preju&iacute;zo calculado
+            <input id="modalProfit" type="text" readonly value="$0">
+          </label>
+          <label class="form-field">
+            Status
+            <select id="modalStatus">
+              <option value="completed">Conclu&iacute;da</option>
+              <option value="review">Revis&atilde;o</option>
+              <option value="ended">Encerrada</option>
+            </select>
+          </label>
+        </div>
+        <p class="form-note" id="modalNote">Valores positivos entram como ganho; valores negativos entram como perda.</p>
+        <div class="modal-actions">
+          <button class="ghost-button" type="button" id="cancelSessionModal">Cancelar</button>
+          <button class="command-button" type="submit" id="saveSessionBtn">Salvar sess&atilde;o</button>
+        </div>
+      </form>
+    </section>
+  </div>
+
+  <div class="modal-backdrop confirm-backdrop" id="discardConfirmModal" aria-hidden="true">
+    <section class="modal confirm-modal" role="alertdialog" aria-modal="true" aria-labelledby="discardConfirmTitle" aria-describedby="discardConfirmMessage">
+      <div class="modal-head">
+        <div>
+          <h2 class="modal-title" id="discardConfirmTitle">Sair sem salvar?</h2>
+        </div>
+      </div>
+      <p class="confirm-message" id="discardConfirmMessage">Se sair agora, os dados preenchidos ser&atilde;o descartados. Quer continuar?</p>
+      <div class="modal-actions">
+        <button class="ghost-button" type="button" id="cancelDiscardExit">N&Atilde;O</button>
+        <button class="danger-button" type="button" id="confirmDiscardExit">SIM</button>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    (() => {
+      const STORAGE_KEY = "pokerdoro.sessions.v2";
+      const LEGACY_STORAGE_KEYS = ["pokerdoro.sessions.v1"];
+      const statusLabels = {
+        completed: "Conclu\u00edda",
+        review: "Revis\u00e3o",
+        ended: "Encerrada"
+      };
+
+      const state = {
+        sessionMinutes: 60,
+        breakMinutes: 15,
+        mode: "session",
+        totalSeconds: 60 * 60,
+        remainingSeconds: 60 * 60,
+        running: false,
+        paused: false,
+        intervalId: null,
+        deadline: null,
+        activeSessionStarted: false,
+        loggedCurrentSession: false,
+        currentSessionName: "PLO5 Cash Game",
+        sessionStartBankroll: 0,
+        sessionStartTimestamp: null,
+        sessions: loadSessions(),
+        dialogMode: "create",
+        pendingAfterMode: "session",
+        pendingDiscardAction: null,
+        pendingDiscardFocus: null
+      };
+
+      const limits = {
+        session: { min: 15, max: 240 },
+        break: { min: 5, max: 60 }
+      };
+
+      const els = {
+        timerDisplay: document.querySelector("#timerDisplay"),
+        progressRing: document.querySelector("#progressRing"),
+        statusPill: document.querySelector("#statusPill"),
+        startBtn: document.querySelector("#startBtn"),
+        startLabel: document.querySelector("#startLabel"),
+        pauseBtn: document.querySelector("#pauseBtn"),
+        pauseLabel: document.querySelector("#pauseLabel"),
+        endBtn: document.querySelector("#endBtn"),
+        sessionValue: document.querySelector("#sessionValue"),
+        breakValue: document.querySelector("#breakValue"),
+        modeTag: document.querySelector("#modeTag"),
+        phaseText: document.querySelector("#phaseText"),
+        timerModeLabel: document.querySelector("#timerModeLabel"),
+        sessionRows: document.querySelector("#sessionRows"),
+        sessionCaptionName: document.querySelector("#sessionCaptionName"),
+        sessionNameInput: document.querySelector("#sessionNameInput"),
+        statTotalSessions: document.querySelector("#statTotalSessions"),
+        statTotalTime: document.querySelector("#statTotalTime"),
+        statNetProfit: document.querySelector("#statNetProfit"),
+        statAvgSession: document.querySelector("#statAvgSession"),
+        reportRoi: document.querySelector("#reportRoi"),
+        reportWinRate: document.querySelector("#reportWinRate"),
+        reportHours: document.querySelector("#reportHours"),
+        reportHands: document.querySelector("#reportHands"),
+        reportEv: document.querySelector("#reportEv"),
+        reportEvBb100: document.querySelector("#reportEvBb100"),
+        reportRake: document.querySelector("#reportRake"),
+        reportBest: document.querySelector("#reportBest"),
+        gamePerformance: document.querySelector("#gamePerformance"),
+        addSessionBtn: document.querySelector("#addSessionBtn"),
+        startSessionModal: document.querySelector("#startSessionModal"),
+        startSessionForm: document.querySelector("#startSessionForm"),
+        closeStartModal: document.querySelector("#closeStartModal"),
+        cancelStartModal: document.querySelector("#cancelStartModal"),
+        startGame: document.querySelector("#startGame"),
+        startBankroll: document.querySelector("#startBankroll"),
+        sessionModal: document.querySelector("#sessionModal"),
+        sessionForm: document.querySelector("#sessionForm"),
+        closeSessionModal: document.querySelector("#closeSessionModal"),
+        cancelSessionModal: document.querySelector("#cancelSessionModal"),
+        modalTitle: document.querySelector("#sessionModalTitle"),
+        modalSubtitle: document.querySelector("#sessionModalSubtitle"),
+        modalNote: document.querySelector("#modalNote"),
+        modalSessionId: document.querySelector("#modalSessionId"),
+        modalGame: document.querySelector("#modalGame"),
+        modalDate: document.querySelector("#modalDate"),
+        modalDuration: document.querySelector("#modalDuration"),
+        modalBankrollStart: document.querySelector("#modalBankrollStart"),
+        modalBankrollEnd: document.querySelector("#modalBankrollEnd"),
+        modalHands: document.querySelector("#modalHands"),
+        modalEvProfit: document.querySelector("#modalEvProfit"),
+        modalEvBb100: document.querySelector("#modalEvBb100"),
+        modalRakePaid: document.querySelector("#modalRakePaid"),
+        modalProfit: document.querySelector("#modalProfit"),
+        modalStatus: document.querySelector("#modalStatus"),
+        saveSessionBtn: document.querySelector("#saveSessionBtn"),
+        discardConfirmModal: document.querySelector("#discardConfirmModal"),
+        discardConfirmTitle: document.querySelector("#discardConfirmTitle"),
+        discardConfirmMessage: document.querySelector("#discardConfirmMessage"),
+        cancelDiscardExit: document.querySelector("#cancelDiscardExit"),
+        confirmDiscardExit: document.querySelector("#confirmDiscardExit"),
+        statWeeklyGrind: document.querySelector("#statWeeklyGrind"),
+        statWeeklyRemaining: document.querySelector("#statWeeklyRemaining"),
+        navLinks: document.querySelectorAll("[data-nav]"),
+        workspace: document.querySelector("#workspace"),
+        routeKicker: document.querySelector("#routeKicker"),
+        routeTitle: document.querySelector("#routeTitle"),
+        routeDescription: document.querySelector("#routeDescription"),
+        routeBadge: document.querySelector("#routeBadge"),
+        profileBtn: document.querySelector("#profileBtn"),
+        profileMenu: document.querySelector("#profileMenu")
+      };
+
+      const routes = {
+        dashboard: {
+          kicker: "Dashboard",
+          title: "Dashboard",
+          description: "Vis\u00e3o operacional da sess\u00e3o atual, bankroll e ritmo de grind.",
+          badge: "Ao vivo"
+        },
+        sessions: {
+          kicker: "Sess\u00f5es",
+          title: "Registro de Sess\u00f5es",
+          description: "Hist\u00f3rico completo das sess\u00f5es, dura\u00e7\u00e3o, resultado l\u00edquido e status.",
+          badge: "87 sess\u00f5es"
+        },
+        reports: {
+          kicker: "Relat\u00f3rios",
+          title: "Performance e Volume",
+          description: "Leitura de ROI, horas grindadas, melhor sess\u00e3o e performance por modalidade.",
+          badge: "30 dias"
+        },
+        settings: {
+          kicker: "Configura\u00e7\u00f5es",
+          title: "Pomodoro e Prefer\u00eancias",
+          description: "Ajuste os ciclos de foco e pausa antes de iniciar ou durante o grind.",
+          badge: "Timer"
+        }
+      };
+
+      const durationForMode = (mode) => mode === "session" ? state.sessionMinutes : state.breakMinutes;
+      const clamp = (value, min, max) => Math.min(Math.max(value, min), max);
+      const pad = (value) => String(value).padStart(2, "0");
+
+      function makeId() {
+        return `session-${Date.now()}-${Math.random().toString(16).slice(2)}`;
+      }
+
+      function todayIso() {
+        return new Date().toISOString().slice(0, 10);
+      }
+
+      function normalizeSessions(sessions) {
+        return sessions.map((session, index) => ({
+          ...normalizeSession(session, index)
+        }));
+      }
+
+      function normalizeSession(session, index = 0) {
+        const durationMinutes = Math.max(1, Number(session.durationMinutes) || 60);
+        const storedProfit = Number(session.profit) || 0;
+        const fallbackStart = 10000 + index * 25;
+        const bankrollStart = Number.isFinite(Number(session.bankrollStart))
+          ? Number(session.bankrollStart)
+          : fallbackStart;
+        const bankrollEnd = Number.isFinite(Number(session.bankrollEnd))
+          ? Number(session.bankrollEnd)
+          : bankrollStart + storedProfit;
+        const parsedHands = Number(session.hands);
+        const evProfit = Number.isFinite(Number(session.evProfit)) ? Number(session.evProfit) : bankrollEnd - bankrollStart;
+        const evBb100 = Number.isFinite(Number(session.evBb100)) ? Number(session.evBb100) : 0;
+        const rakePaid = Number.isFinite(Number(session.rakePaid)) ? Number(session.rakePaid) : 0;
+
+        return {
+          id: session.id || `session-${index + 1}`,
+          date: session.date || todayIso(),
+          game: session.game || "Sess\u00e3o sem descri\u00e7\u00e3o",
+          durationMinutes,
+          bankrollStart,
+          bankrollEnd,
+          profit: bankrollEnd - bankrollStart,
+          hands: Number.isFinite(parsedHands) ? Math.max(0, Math.round(parsedHands)) : Math.round(durationMinutes * 72),
+          evProfit,
+          evBb100,
+          rakePaid: Math.max(0, rakePaid),
+          status: statusLabels[session.status] ? session.status : "completed",
+          startedAt: session.startedAt || "",
+          endedAt: session.endedAt || ""
+        };
+      }
+
+      function loadSessions() {
+        LEGACY_STORAGE_KEYS.forEach((key) => {
+          try {
+            localStorage.removeItem(key);
+          } catch (storageError) {}
+        });
+
+        try {
+          const stored = JSON.parse(localStorage.getItem(STORAGE_KEY) || "null");
+          if (Array.isArray(stored) && stored.length) {
+            return normalizeSessions(stored);
+          }
+        } catch (error) {
+          try {
+            localStorage.removeItem(STORAGE_KEY);
+          } catch (storageError) {}
+        }
+
+        return [];
+      }
+
+      function saveSessions() {
+        try {
+          localStorage.setItem(STORAGE_KEY, JSON.stringify(state.sessions));
+        } catch (storageError) {}
+      }
+
+      function formatClock(seconds) {
+        const safeSeconds = Math.max(0, Math.floor(seconds));
+        const hours = Math.floor(safeSeconds / 3600);
+        const minutes = Math.floor((safeSeconds % 3600) / 60);
+        const secs = safeSeconds % 60;
+        return `${pad(hours)}:${pad(minutes)}:${pad(secs)}`;
+      }
+
+      function formatMinutes(minutes) {
+        if (minutes < 60) return `${minutes}m`;
+        const hours = Math.floor(minutes / 60);
+        const rest = minutes % 60;
+        return rest ? `${hours}h ${rest}m` : `${hours}h`;
+      }
+
+      function formatTableDuration(seconds) {
+        const roundedMinutes = Math.max(1, Math.round(seconds / 60));
+        const hours = Math.floor(roundedMinutes / 60);
+        const minutes = roundedMinutes % 60;
+        if (hours && minutes) return `${hours}h ${minutes}m`;
+        if (hours) return `${hours}h`;
+        return `${minutes}m`;
+      }
+
+      function formatDurationMinutes(minutes) {
+        const safeMinutes = Math.max(0, Math.round(minutes));
+        const hours = Math.floor(safeMinutes / 60);
+        const rest = safeMinutes % 60;
+        if (hours && rest) return `${hours}h ${pad(rest)}m`;
+        if (hours) return `${hours}h`;
+        return `${rest}m`;
+      }
+
+      function formatDateLabel(isoDate) {
+        return new Intl.DateTimeFormat("pt-BR", { day: "2-digit", month: "short" })
+          .format(new Date(`${isoDate}T12:00:00`))
+          .replace(".", "");
+      }
+
+      function formatSignedMoney(value, decimals = 0) {
+        const amount = Number(value) || 0;
+        const sign = amount > 0 ? "+" : amount < 0 ? "-" : "";
+        const fixed = Math.abs(amount).toFixed(decimals);
+        const [integer, fraction] = fixed.split(".");
+        const integerWithThousands = integer.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+        return `${sign}$${integerWithThousands}${fraction ? `.${fraction}` : ""}`;
+      }
+
+      function formatMoney(value, decimals = 0) {
+        const amount = Number(value) || 0;
+        const fixed = Math.abs(amount).toFixed(decimals);
+        const [integer, fraction] = fixed.split(".");
+        const integerWithThousands = integer.replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+        return `$${integerWithThousands}${fraction ? `.${fraction}` : ""}`;
+      }
+
+      function formatInteger(value) {
+        return String(Math.round(Number(value) || 0)).replace(/\B(?=(\d{3})+(?!\d))/g, ".");
+      }
+
+      function moneyClass(value) {
+        if (value > 0) return "positive";
+        if (value < 0) return "negative";
+        return "neutral";
+      }
+
+      function getStats(sessions = state.sessions) {
+        const totalSessions = sessions.length;
+        const totalMinutes = sessions.reduce((sum, session) => sum + session.durationMinutes, 0);
+        const totalProfit = sessions.reduce((sum, session) => sum + session.profit, 0);
+        const totalHands = sessions.reduce((sum, session) => sum + (Number(session.hands) || 0), 0);
+        const totalEv = sessions.reduce((sum, session) => sum + (Number(session.evProfit) || 0), 0);
+        const totalRake = sessions.reduce((sum, session) => sum + (Number(session.rakePaid) || 0), 0);
+        const weightedEvBb100 = totalHands
+          ? sessions.reduce((sum, session) => sum + (Number(session.evBb100) || 0) * (Number(session.hands) || 0), 0) / totalHands
+          : 0;
+        const winningSessions = sessions.filter((session) => session.profit > 0).length;
+        const sortedByDate = [...sessions].sort((a, b) => {
+          const left = a.startedAt || `${a.date}T12:00:00`;
+          const right = b.startedAt || `${b.date}T12:00:00`;
+          return new Date(left) - new Date(right);
+        });
+        const bankrollBase = sortedByDate[0]?.bankrollStart || 0;
+
+        return {
+          totalSessions,
+          totalMinutes,
+          totalHands,
+          totalProfit,
+          totalEv,
+          totalRake,
+          weightedEvBb100,
+          avgProfit: totalSessions ? totalProfit / totalSessions : 0,
+          bestProfit: sessions.length ? Math.max(...sessions.map((session) => session.profit)) : 0,
+          winRate: totalSessions ? (winningSessions / totalSessions) * 100 : 0,
+          roi: bankrollBase ? (totalProfit / bankrollBase) * 100 : 0
+        };
+      }
+
+      function getLast30Sessions() {
+        const cutoff = new Date();
+        cutoff.setDate(cutoff.getDate() - 30);
+        cutoff.setHours(0, 0, 0, 0);
+
+        return state.sessions.filter((session) => new Date(`${session.date}T12:00:00`) >= cutoff);
+      }
+
+      function getWeekStartDate() {
+        const now = new Date();
+        const day = now.getDay();
+        const diff = day === 0 ? -6 : 1 - day;
+        const monday = new Date(now);
+        monday.setDate(now.getDate() + diff);
+        monday.setHours(0, 0, 0, 0);
+        return monday.toISOString().slice(0, 10);
+      }
+
+      function getWeeklySeconds() {
+        const weekStart = getWeekStartDate();
+        const savedMinutes = state.sessions
+          .filter((s) => s.date >= weekStart)
+          .reduce((sum, s) => sum + s.durationMinutes, 0);
+        const liveSeconds = (state.activeSessionStarted && !state.loggedCurrentSession && state.mode === "session")
+          ? state.totalSeconds - state.remainingSeconds
+          : 0;
+        return savedMinutes * 60 + liveSeconds;
+      }
+
+      function renderWeeklyStats() {
+        const weeklySeconds = getWeeklySeconds();
+        const weeklyMinutes = Math.floor(weeklySeconds / 60);
+        const remainingMinutes = Math.max(0, 2400 - weeklyMinutes);
+        els.statWeeklyGrind.textContent = formatDurationMinutes(weeklyMinutes);
+        els.statWeeklyGrind.className = weeklyMinutes >= 2400 ? "stat-value positive" : "stat-value";
+        els.statWeeklyRemaining.textContent = remainingMinutes === 0
+          ? "Meta semanal atingida!"
+          : `Faltam ${formatDurationMinutes(remainingMinutes)}`;
+      }
+
+      function getLatestBankroll() {
+        const latest = getSortedSessions()[0];
+        return latest ? latest.bankrollEnd : 0;
+      }
+
+      function getSessionName() {
+        return els.sessionNameInput.value.trim() || "Sess\u00e3o sem descri\u00e7\u00e3o";
+      }
+
+      function setActiveNav(route) {
+        document.querySelectorAll(".nav-link").forEach((link) => {
+          link.classList.toggle("active", link.dataset.nav === route);
+        });
+      }
+
+      function navigateTo(route, updateHash = true) {
+        const nextRoute = routes[route] ? route : "dashboard";
+        const routeMeta = routes[nextRoute];
+
+        els.workspace.dataset.route = nextRoute;
+        els.routeKicker.textContent = routeMeta.kicker;
+        els.routeTitle.textContent = routeMeta.title;
+        els.routeDescription.textContent = routeMeta.description;
+        els.routeBadge.textContent = routeMeta.badge;
+        els.workspace.focus({ preventScroll: true });
+        setActiveNav(nextRoute);
+
+        window.scrollTo({ top: 0, behavior: "smooth" });
+
+        if (updateHash) {
+          const nextHash = `#${nextRoute}`;
+          if (window.location.hash !== nextHash) {
+            history.pushState({ route: nextRoute }, "", nextHash);
+          }
+        }
+      }
+
+      function toggleProfileMenu(forceOpen) {
+        const shouldOpen = typeof forceOpen === "boolean"
+          ? forceOpen
+          : !els.profileMenu.classList.contains("open");
+
+        els.profileMenu.classList.toggle("open", shouldOpen);
+        els.profileBtn.setAttribute("aria-expanded", String(shouldOpen));
+      }
+
+      function resetTimerForMode(mode) {
+        state.mode = mode;
+        state.totalSeconds = durationForMode(mode) * 60;
+        state.remainingSeconds = state.totalSeconds;
+      }
+
+      function syncFromDeadline() {
+        if (!state.running || !state.deadline) return;
+        state.remainingSeconds = Math.max(0, Math.ceil((state.deadline - Date.now()) / 1000));
+
+        if (state.remainingSeconds <= 0) {
+          finishCycle();
+          return;
+        }
+
+        render();
+      }
+
+      function beginTimer() {
+        if (state.running) return;
+
+        if (state.remainingSeconds <= 0) {
+          resetTimerForMode(state.mode);
+        }
+
+        if (state.mode === "session") {
+          state.activeSessionStarted = true;
+          state.loggedCurrentSession = false;
+        }
+
+        state.running = true;
+        state.paused = false;
+        state.deadline = Date.now() + state.remainingSeconds * 1000;
+        window.clearInterval(state.intervalId);
+        state.intervalId = window.setInterval(syncFromDeadline, 250);
+        render();
+      }
+
+      function startTimer() {
+        if (state.running) return;
+
+        if (state.paused || state.mode !== "session" || state.activeSessionStarted) {
+          beginTimer();
+          return;
+        }
+
+        openStartSessionModal();
+      }
+
+      function pauseTimer() {
+        if (state.running) {
+          syncFromDeadline();
+          window.clearInterval(state.intervalId);
+          state.running = false;
+          state.paused = true;
+          render();
+          return;
+        }
+
+        if (state.paused) {
+          startTimer();
+        }
+      }
+
+      function openStartSessionModal() {
+        els.startGame.value = getSessionName();
+        els.startBankroll.value = getLatestBankroll() ? String(getLatestBankroll().toFixed(2)) : "";
+        els.startSessionModal.classList.add("open");
+        els.startSessionModal.setAttribute("aria-hidden", "false");
+        window.setTimeout(() => els.startGame.focus(), 60);
+      }
+
+      function closeStartSessionModal() {
+        els.startSessionModal.classList.remove("open");
+        els.startSessionModal.setAttribute("aria-hidden", "true");
+      }
+
+      function openDiscardConfirm({ title, message, onConfirm, returnFocus }) {
+        state.pendingDiscardAction = onConfirm;
+        state.pendingDiscardFocus = returnFocus || document.activeElement;
+        els.discardConfirmTitle.textContent = title;
+        els.discardConfirmMessage.textContent = message;
+        els.discardConfirmModal.classList.add("open");
+        els.discardConfirmModal.setAttribute("aria-hidden", "false");
+        window.setTimeout(() => els.cancelDiscardExit.focus(), 60);
+      }
+
+      function closeDiscardConfirm(restoreFocus = true) {
+        const focusTarget = state.pendingDiscardFocus;
+        els.discardConfirmModal.classList.remove("open");
+        els.discardConfirmModal.setAttribute("aria-hidden", "true");
+        state.pendingDiscardAction = null;
+        state.pendingDiscardFocus = null;
+
+        if (restoreFocus && focusTarget && typeof focusTarget.focus === "function") {
+          window.setTimeout(() => focusTarget.focus(), 60);
+        }
+      }
+
+      function confirmDiscardExit() {
+        const action = state.pendingDiscardAction;
+        closeDiscardConfirm(false);
+        if (typeof action === "function") {
+          action();
+        }
+      }
+
+      function requestStartSessionDismiss() {
+        openDiscardConfirm({
+          title: "Sair sem iniciar?",
+          message: "Se voc\u00ea sair agora, a sess\u00e3o n\u00e3o ser\u00e1 iniciada e os dados preenchidos ser\u00e3o descartados. Quer continuar?",
+          onConfirm: closeStartSessionModal,
+          returnFocus: els.startGame
+        });
+      }
+
+      function requestSessionModalDismiss() {
+        const isFinalize = state.dialogMode === "finalize";
+        openDiscardConfirm({
+          title: isFinalize ? "Sair sem salvar a sess\u00e3o?" : "Sair sem salvar?",
+          message: isFinalize
+            ? "Se voc\u00ea sair agora, o resultado desta sess\u00e3o n\u00e3o ser\u00e1 salvo. Quer continuar?"
+            : "Se voc\u00ea sair agora, as altera\u00e7\u00f5es preenchidas ser\u00e3o descartadas. Quer continuar?",
+          onConfirm: () => closeSessionModal(true),
+          returnFocus: isFinalize ? els.modalBankrollEnd : els.modalGame
+        });
+      }
+
+      function confirmStartSession() {
+        const game = els.startGame.value.trim() || "Sess\u00e3o sem descri\u00e7\u00e3o";
+        const bankroll = Number(els.startBankroll.value);
+
+        state.currentSessionName = game;
+        state.sessionStartBankroll = Number.isFinite(bankroll) ? bankroll : 0;
+        state.sessionStartTimestamp = Date.now();
+        state.activeSessionStarted = true;
+        state.loggedCurrentSession = false;
+        state.mode = "session";
+        state.totalSeconds = state.sessionMinutes * 60;
+        state.remainingSeconds = state.totalSeconds;
+        els.sessionNameInput.value = game;
+        els.sessionCaptionName.textContent = game;
+
+        closeStartSessionModal();
+        beginTimer();
+      }
+
+      function getModalProfit() {
+        return (Number(els.modalBankrollEnd.value) || 0) - (Number(els.modalBankrollStart.value) || 0);
+      }
+
+      function updateProfitPreview() {
+        const profit = getModalProfit();
+        els.modalProfit.value = formatSignedMoney(profit, 2);
+        setMoneyTone(els.modalProfit, profit);
+      }
+
+      function openSessionModal(mode, session, afterMode = "session") {
+        state.dialogMode = mode;
+        state.pendingAfterMode = afterMode;
+
+        els.modalSessionId.value = session.id || "";
+        els.modalGame.value = session.game || getSessionName();
+        els.modalDate.value = session.date || todayIso();
+        els.modalDuration.value = String(session.durationMinutes || state.sessionMinutes);
+        els.modalBankrollStart.value = String(session.bankrollStart ?? getLatestBankroll() ?? 0);
+        els.modalBankrollEnd.value = String(session.bankrollEnd ?? session.bankrollStart ?? getLatestBankroll() ?? 0);
+        els.modalHands.value = String(session.hands ?? 0);
+        els.modalEvProfit.value = String(session.evProfit ?? "");
+        els.modalEvBb100.value = String(session.evBb100 ?? "");
+        els.modalRakePaid.value = String(session.rakePaid ?? "");
+        els.modalStatus.value = session.status || "completed";
+
+        const isFinalize = mode === "finalize";
+        els.modalDate.readOnly = isFinalize;
+        els.modalDuration.readOnly = isFinalize;
+        els.modalBankrollStart.readOnly = isFinalize;
+        els.modalTitle.textContent = isFinalize ? "Finalizar sess\u00e3o" : session.id ? "Editar sess\u00e3o" : "Nova sess\u00e3o";
+        els.modalSubtitle.textContent = isFinalize
+          ? "Informe a banca ap\u00f3s a sess\u00e3o e os stats agregados do Hand2Note."
+          : "Edite os dados da sess\u00e3o. As m\u00e9tricas ser\u00e3o recalculadas automaticamente.";
+        els.modalNote.textContent = isFinalize
+          ? "Lucro/preju\u00edzo = banca final menos banca inicial. A dura\u00e7\u00e3o vem da hora de iniciar e finalizar."
+          : "Lucro/preju\u00edzo \u00e9 calculado automaticamente pela diferen\u00e7a entre banca final e inicial.";
+        els.saveSessionBtn.textContent = isFinalize ? "Salvar resultado" : "Salvar sess\u00e3o";
+        updateProfitPreview();
+
+        els.sessionModal.classList.add("open");
+        els.sessionModal.setAttribute("aria-hidden", "false");
+        window.setTimeout(() => (isFinalize ? els.modalBankrollEnd : els.modalGame).focus(), 60);
+      }
+
+      function closeSessionModal(discardPending = false) {
+        els.sessionModal.classList.remove("open");
+        els.sessionModal.setAttribute("aria-hidden", "true");
+
+        if (discardPending && state.dialogMode === "finalize") {
+          state.activeSessionStarted = false;
+          state.loggedCurrentSession = true;
+          state.sessionStartTimestamp = null;
+          state.sessionStartBankroll = 0;
+          if (state.pendingAfterMode === "break") {
+            resetTimerForMode("break");
+          } else {
+            state.mode = "session";
+            state.totalSeconds = state.sessionMinutes * 60;
+            state.remainingSeconds = 0;
+          }
+          render();
+        }
+      }
+
+      function sessionFromModal() {
+        const bankrollStart = Number(els.modalBankrollStart.value) || 0;
+        const bankrollEnd = Number(els.modalBankrollEnd.value) || 0;
+        const existing = state.sessions.find((item) => item.id === els.modalSessionId.value);
+        const profit = bankrollEnd - bankrollStart;
+        return {
+          id: els.modalSessionId.value || makeId(),
+          date: els.modalDate.value || todayIso(),
+          game: els.modalGame.value.trim() || "Sess\u00e3o sem descri\u00e7\u00e3o",
+          durationMinutes: Math.max(1, Number(els.modalDuration.value) || 1),
+          bankrollStart,
+          bankrollEnd,
+          profit,
+          hands: Math.max(0, Math.round(Number(els.modalHands.value) || 0)),
+          evProfit: Number.isFinite(Number(els.modalEvProfit.value)) ? Number(els.modalEvProfit.value) : profit,
+          evBb100: Number.isFinite(Number(els.modalEvBb100.value)) ? Number(els.modalEvBb100.value) : 0,
+          rakePaid: Math.max(0, Number(els.modalRakePaid.value) || 0),
+          status: els.modalStatus.value,
+          startedAt: state.dialogMode === "finalize" && state.sessionStartTimestamp
+            ? new Date(state.sessionStartTimestamp).toISOString()
+            : existing?.startedAt || "",
+          endedAt: state.dialogMode === "finalize"
+            ? new Date().toISOString()
+            : existing?.endedAt || ""
+        };
+      }
+
+      function upsertSession(session) {
+        const index = state.sessions.findIndex((item) => item.id === session.id);
+        if (index >= 0) {
+          state.sessions[index] = session;
+        } else {
+          state.sessions.unshift(session);
+        }
+        saveSessions();
+        renderDataViews();
+      }
+
+      function saveSessionFromModal() {
+        const session = sessionFromModal();
+        upsertSession(session);
+
+        if (state.dialogMode === "finalize") {
+          state.activeSessionStarted = false;
+          state.loggedCurrentSession = true;
+          state.sessionStartTimestamp = null;
+          state.sessionStartBankroll = 0;
+          if (state.pendingAfterMode === "break") {
+            resetTimerForMode("break");
+          } else {
+            state.mode = "session";
+            state.totalSeconds = state.sessionMinutes * 60;
+            state.remainingSeconds = 0;
+          }
+        }
+
+        closeSessionModal(false);
+        render();
+        navigateTo("sessions");
+      }
+
+      function endSession() {
+        if (state.running) {
+          syncFromDeadline();
+        }
+
+        const endedAt = Date.now();
+        const elapsed = state.sessionStartTimestamp
+          ? Math.max(60000, endedAt - state.sessionStartTimestamp)
+          : (state.totalSeconds - state.remainingSeconds) * 1000;
+        window.clearInterval(state.intervalId);
+
+        state.running = false;
+        state.paused = false;
+        state.deadline = null;
+        state.remainingSeconds = 0;
+
+        if (state.activeSessionStarted && !state.loggedCurrentSession && elapsed > 0) {
+          openSessionModal("finalize", {
+            id: "",
+            date: todayIso(),
+            game: state.currentSessionName,
+            durationMinutes: Math.max(1, Math.round(elapsed / 60000)),
+            bankrollStart: state.sessionStartBankroll,
+            bankrollEnd: state.sessionStartBankroll,
+            hands: 0,
+            evProfit: 0,
+            evBb100: 0,
+            rakePaid: 0,
+            status: "ended"
+          }, "session");
+        } else {
+          state.activeSessionStarted = false;
+          state.loggedCurrentSession = true;
+          state.mode = "session";
+          state.totalSeconds = state.sessionMinutes * 60;
+          state.remainingSeconds = 0;
+        }
+
+        render();
+      }
+
+      function finishCycle() {
+        window.clearInterval(state.intervalId);
+        state.running = false;
+        state.paused = false;
+        state.deadline = null;
+        state.remainingSeconds = 0;
+
+        if (state.mode === "session") {
+          if (state.activeSessionStarted && !state.loggedCurrentSession) {
+            const endedAt = Date.now();
+            const elapsed = state.sessionStartTimestamp
+              ? Math.max(60000, endedAt - state.sessionStartTimestamp)
+              : state.totalSeconds * 1000;
+            openSessionModal("finalize", {
+              id: "",
+              date: todayIso(),
+              game: state.currentSessionName,
+              durationMinutes: Math.max(1, Math.round(elapsed / 60000)),
+              bankrollStart: state.sessionStartBankroll,
+              bankrollEnd: state.sessionStartBankroll,
+              hands: 0,
+              evProfit: 0,
+              evBb100: 0,
+              rakePaid: 0,
+              status: "completed"
+            }, "break");
+            render();
+            return;
+          }
+          state.activeSessionStarted = false;
+          resetTimerForMode("break");
+        } else {
+          resetTimerForMode("session");
+        }
+
+        render();
+      }
+
+      function setDuration(kind, minutes) {
+        const safeMinutes = clamp(minutes, limits[kind].min, limits[kind].max);
+        if (kind === "session") {
+          state.sessionMinutes = safeMinutes;
+        } else {
+          state.breakMinutes = safeMinutes;
+        }
+
+        if (!state.running) {
+          resetTimerForMode(kind);
+          state.paused = false;
+          state.deadline = null;
+        } else if (state.mode === kind) {
+          const elapsed = state.totalSeconds - state.remainingSeconds;
+          state.totalSeconds = safeMinutes * 60;
+          state.remainingSeconds = Math.max(0, state.totalSeconds - elapsed);
+          state.deadline = Date.now() + state.remainingSeconds * 1000;
+        }
+
+        render();
+      }
+
+      function getSortedSessions() {
+        return [...state.sessions].sort((a, b) => {
+          const dateDiff = new Date(`${b.date}T12:00:00`) - new Date(`${a.date}T12:00:00`);
+          return dateDiff || b.id.localeCompare(a.id);
+        });
+      }
+
+      function setMoneyTone(element, value) {
+        element.classList.remove("positive", "negative", "neutral");
+        element.classList.add(moneyClass(value));
+      }
+
+      function renderSessionRows() {
+        els.sessionRows.innerHTML = "";
+
+        getSortedSessions().forEach((session) => {
+          const row = document.createElement("tr");
+          row.dataset.sessionId = session.id;
+
+          const cells = [
+            formatDateLabel(session.date),
+            session.game,
+            formatDurationMinutes(session.durationMinutes),
+            formatInteger(session.hands)
+          ];
+
+          cells.forEach((value) => {
+            const cell = document.createElement("td");
+            cell.textContent = value;
+            row.append(cell);
+          });
+
+          const profitCell = document.createElement("td");
+          profitCell.textContent = formatSignedMoney(session.profit);
+          profitCell.className = moneyClass(session.profit);
+          row.append(profitCell);
+
+          const evBb100Cell = document.createElement("td");
+          evBb100Cell.textContent = Number(session.evBb100 || 0).toFixed(1);
+          evBb100Cell.className = moneyClass(session.evBb100);
+          row.append(evBb100Cell);
+
+          const rakeCell = document.createElement("td");
+          rakeCell.textContent = formatMoney(session.rakePaid, 2);
+          row.append(rakeCell);
+
+          const actionsCell = document.createElement("td");
+          const actions = document.createElement("div");
+          actions.className = "table-actions";
+          const editButton = document.createElement("button");
+          editButton.className = "details-button";
+          editButton.type = "button";
+          editButton.dataset.action = "edit";
+          editButton.dataset.id = session.id;
+          editButton.textContent = "Editar";
+
+          const deleteButton = document.createElement("button");
+          deleteButton.className = "details-button danger-link";
+          deleteButton.type = "button";
+          deleteButton.dataset.action = "delete";
+          deleteButton.dataset.id = session.id;
+          deleteButton.textContent = "Excluir";
+
+          actions.append(editButton, deleteButton);
+          actionsCell.append(actions);
+          row.append(actionsCell);
+
+          els.sessionRows.append(row);
+        });
+      }
+
+      function renderStats() {
+        const stats = getStats();
+        els.statTotalSessions.textContent = String(stats.totalSessions);
+        els.statTotalTime.textContent = formatDurationMinutes(stats.totalMinutes);
+        els.statNetProfit.textContent = formatSignedMoney(stats.totalProfit);
+        els.statAvgSession.textContent = formatSignedMoney(stats.avgProfit, 2);
+        setMoneyTone(els.statNetProfit, stats.totalProfit);
+        setMoneyTone(els.statAvgSession, stats.avgProfit);
+
+        routes.sessions.badge = `${stats.totalSessions} sess\u00f5es`;
+        routes.dashboard.badge = formatSignedMoney(stats.totalProfit);
+        renderWeeklyStats();
+      }
+
+      function renderReports() {
+        const recentSessions = getLast30Sessions();
+        const stats = getStats(recentSessions);
+
+        els.reportRoi.textContent = `${stats.roi >= 0 ? "+" : ""}${stats.roi.toFixed(1)}%`;
+        els.reportWinRate.textContent = `${Math.round(stats.winRate)}%`;
+        els.reportHours.textContent = formatDurationMinutes(stats.totalMinutes);
+        els.reportHands.textContent = formatInteger(stats.totalHands);
+        els.reportEv.textContent = formatSignedMoney(stats.totalEv);
+        els.reportEvBb100.textContent = stats.weightedEvBb100.toFixed(1);
+        els.reportRake.textContent = formatMoney(stats.totalRake, 2);
+        els.reportBest.textContent = formatSignedMoney(stats.bestProfit);
+        setMoneyTone(els.reportRoi, stats.roi);
+        setMoneyTone(els.reportWinRate, stats.winRate - 50);
+        setMoneyTone(els.reportEv, stats.totalEv);
+        setMoneyTone(els.reportEvBb100, stats.weightedEvBb100);
+        setMoneyTone(els.reportBest, stats.bestProfit);
+
+        const grouped = recentSessions.reduce((map, session) => {
+          const current = map.get(session.game) || { game: session.game, profit: 0, minutes: 0, count: 0 };
+          current.profit += session.profit;
+          current.minutes += session.durationMinutes;
+          current.count += 1;
+          map.set(session.game, current);
+          return map;
+        }, new Map());
+
+        const rows = [...grouped.values()]
+          .sort((a, b) => Math.abs(b.profit) - Math.abs(a.profit))
+          .slice(0, 6);
+        const maxProfit = Math.max(1, ...rows.map((row) => Math.abs(row.profit)));
+        els.gamePerformance.innerHTML = "";
+
+        rows.forEach((row) => {
+          const item = document.createElement("div");
+          item.className = "performance-row";
+          const width = Math.max(8, Math.round((Math.abs(row.profit) / maxProfit) * 100));
+
+          const gameName = document.createElement("b");
+          gameName.textContent = row.game;
+
+          const track = document.createElement("span");
+          track.className = "bar-track";
+          const fill = document.createElement("span");
+          fill.className = `bar-fill ${row.profit < 0 ? "negative" : ""}`;
+          fill.style.setProperty("--value", `${width}%`);
+          track.append(fill);
+
+          const profit = document.createElement("em");
+          profit.className = moneyClass(row.profit);
+          profit.textContent = formatSignedMoney(row.profit);
+
+          item.append(gameName, track, profit);
+          els.gamePerformance.append(item);
+        });
+      }
+
+      function refreshRouteHeader() {
+        const currentRoute = els.workspace.dataset.route || "dashboard";
+        const routeMeta = routes[currentRoute];
+        els.routeKicker.textContent = routeMeta.kicker;
+        els.routeTitle.textContent = routeMeta.title;
+        els.routeDescription.textContent = routeMeta.description;
+        els.routeBadge.textContent = routeMeta.badge;
+      }
+
+      function renderDataViews() {
+        renderStats();
+        renderSessionRows();
+        renderReports();
+        refreshRouteHeader();
+      }
+
+      function renderQuickButtons() {
+        document.querySelectorAll("[data-preset]").forEach((button) => {
+          const kind = button.dataset.preset;
+          const target = Number(button.dataset.minutes);
+          const current = kind === "session" ? state.sessionMinutes : state.breakMinutes;
+          button.classList.toggle("is-active", current === target);
+        });
+      }
+
+      function render() {
+        const ratio = state.totalSeconds > 0 ? state.remainingSeconds / state.totalSeconds : 0;
+        const progressOffset = 100 - clamp(ratio, 0, 1) * 100;
+
+        els.timerDisplay.textContent = formatClock(state.remainingSeconds);
+        els.progressRing.style.strokeDashoffset = String(progressOffset);
+        els.sessionValue.textContent = formatMinutes(state.sessionMinutes);
+        els.breakValue.textContent = formatMinutes(state.breakMinutes);
+        els.sessionCaptionName.textContent = getSessionName();
+
+        const isSession = state.mode === "session";
+        els.modeTag.textContent = isSession ? "Sess\u00e3o" : "Pausa";
+        els.timerModeLabel.textContent = isSession ? "Pomodoro Timer" : "Break Timer";
+        els.startLabel.textContent = isSession ? "START SESSION" : "START BREAK";
+
+        if (state.running) {
+          els.statusPill.textContent = isSession ? "Em sess\u00e3o" : "Em pausa";
+          els.phaseText.textContent = isSession
+            ? `Foco ativo com pausa configurada em ${formatMinutes(state.breakMinutes)}`
+            : "Pausa em andamento para recuperar foco";
+        } else if (state.paused) {
+          els.statusPill.textContent = "Pausada";
+          els.phaseText.textContent = "Contagem pausada, pronta para retomar";
+        } else if (state.remainingSeconds === 0) {
+          els.statusPill.textContent = "Encerrada";
+          els.phaseText.textContent = "Sess\u00e3o finalizada; ajuste o ciclo ou inicie novamente";
+        } else {
+          els.statusPill.textContent = isSession ? "Pronta" : "Pausa pronta";
+          els.phaseText.textContent = isSession
+            ? `Foco ativo com pausa configurada em ${formatMinutes(state.breakMinutes)}`
+            : `Pausa configurada em ${formatMinutes(state.breakMinutes)}`;
+        }
+
+        els.pauseBtn.disabled = !state.running && !state.paused;
+        els.pauseLabel.textContent = state.paused ? "Resume" : "Pause";
+        if (state.running && state.mode === "session") renderWeeklyStats();
+        renderQuickButtons();
+      }
+
+      document.querySelectorAll("[data-adjust]").forEach((button) => {
+        button.addEventListener("click", () => {
+          const kind = button.dataset.adjust;
+          const delta = Number(button.dataset.delta);
+          const current = kind === "session" ? state.sessionMinutes : state.breakMinutes;
+          setDuration(kind, current + delta);
+        });
+      });
+
+      document.querySelectorAll("[data-preset]").forEach((button) => {
+        button.addEventListener("click", () => {
+          setDuration(button.dataset.preset, Number(button.dataset.minutes));
+        });
+      });
+
+      els.sessionNameInput.addEventListener("input", () => {
+        state.currentSessionName = getSessionName();
+        els.sessionCaptionName.textContent = state.currentSessionName;
+      });
+
+      els.sessionNameInput.addEventListener("blur", () => {
+        if (!els.sessionNameInput.value.trim()) {
+          els.sessionNameInput.value = state.currentSessionName;
+        }
+        render();
+      });
+
+      els.addSessionBtn.addEventListener("click", () => {
+        const bankroll = getLatestBankroll();
+        openSessionModal("create", {
+          id: "",
+          date: todayIso(),
+          game: getSessionName(),
+          durationMinutes: state.sessionMinutes,
+          bankrollStart: bankroll,
+          bankrollEnd: bankroll,
+          hands: 0,
+          evProfit: 0,
+          evBb100: 0,
+          rakePaid: 0,
+          status: "completed"
+        });
+      });
+
+      els.sessionRows.addEventListener("click", (event) => {
+        const button = event.target.closest("[data-action]");
+        if (!button) return;
+
+        const session = state.sessions.find((item) => item.id === button.dataset.id);
+        if (!session) return;
+
+        if (button.dataset.action === "edit") {
+          openSessionModal("edit", session);
+          return;
+        }
+
+        if (button.dataset.action === "delete") {
+          openDiscardConfirm({
+            title: "Excluir sess\u00e3o?",
+            message: "Esta sess\u00e3o ser\u00e1 removida permanentemente do hist\u00f3rico. Quer continuar?",
+            onConfirm: () => {
+              state.sessions = state.sessions.filter((item) => item.id !== session.id);
+              saveSessions();
+              renderDataViews();
+            },
+            returnFocus: button
+          });
+        }
+      });
+
+      els.sessionForm.addEventListener("submit", (event) => {
+        event.preventDefault();
+        saveSessionFromModal();
+      });
+
+      els.startSessionForm.addEventListener("submit", (event) => {
+        event.preventDefault();
+        confirmStartSession();
+      });
+
+      els.closeStartModal.addEventListener("click", requestStartSessionDismiss);
+      els.cancelStartModal.addEventListener("click", requestStartSessionDismiss);
+      els.startSessionModal.addEventListener("click", (event) => {
+        if (event.target === els.startSessionModal) {
+          requestStartSessionDismiss();
+        }
+      });
+
+      [els.modalBankrollStart, els.modalBankrollEnd].forEach((input) => {
+        input.addEventListener("input", updateProfitPreview);
+      });
+
+      els.closeSessionModal.addEventListener("click", requestSessionModalDismiss);
+      els.cancelSessionModal.addEventListener("click", requestSessionModalDismiss);
+      els.sessionModal.addEventListener("click", (event) => {
+        if (event.target === els.sessionModal) {
+          requestSessionModalDismiss();
+        }
+      });
+
+      els.cancelDiscardExit.addEventListener("click", () => closeDiscardConfirm(true));
+      els.confirmDiscardExit.addEventListener("click", confirmDiscardExit);
+      els.discardConfirmModal.addEventListener("click", (event) => {
+        if (event.target === els.discardConfirmModal) {
+          event.stopPropagation();
+        }
+      });
+
+      els.navLinks.forEach((link) => {
+        link.addEventListener("click", (event) => {
+          event.preventDefault();
+          navigateTo(link.dataset.nav);
+          toggleProfileMenu(false);
+        });
+      });
+
+      els.profileBtn.addEventListener("click", (event) => {
+        event.stopPropagation();
+        toggleProfileMenu();
+      });
+
+      els.profileMenu.addEventListener("click", (event) => {
+        const actionButton = event.target.closest("[data-profile-action]");
+        if (!actionButton) return;
+
+        const messages = {
+          bankroll: "Bankroll aberta",
+          export: "Exporta\u00e7\u00e3o pronta",
+          logout: "Perfil ativo"
+        };
+
+        els.statusPill.textContent = messages[actionButton.dataset.profileAction];
+        toggleProfileMenu(false);
+      });
+
+      document.addEventListener("click", () => toggleProfileMenu(false));
+      document.addEventListener("keydown", (event) => {
+        if (event.key === "Escape") {
+          if (els.discardConfirmModal.classList.contains("open")) {
+            closeDiscardConfirm(true);
+            return;
+          }
+          if (els.sessionModal.classList.contains("open")) {
+            requestSessionModalDismiss();
+            return;
+          }
+          if (els.startSessionModal.classList.contains("open")) {
+            requestStartSessionDismiss();
+            return;
+          }
+          toggleProfileMenu(false);
+        }
+      });
+
+      window.addEventListener("popstate", () => {
+        const route = window.location.hash.replace("#", "") || "dashboard";
+        navigateTo(route, false);
+      });
+
+      els.startBtn.addEventListener("click", startTimer);
+      els.pauseBtn.addEventListener("click", pauseTimer);
+      els.endBtn.addEventListener("click", endSession);
+
+      renderDataViews();
+      render();
+
+      const initialRoute = window.location.hash.replace("#", "");
+      if (["dashboard", "sessions", "reports", "settings"].includes(initialRoute)) {
+        window.setTimeout(() => navigateTo(initialRoute, false), 80);
+      } else {
+        navigateTo("dashboard", false);
+      }
+    })();
+  </script>
+</body>
+</html>
